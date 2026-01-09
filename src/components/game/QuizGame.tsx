@@ -1,0 +1,186 @@
+import { useState, useCallback, useEffect } from "react";
+import { Question, loadQuestionsFromApi, fallbackQuestions, getLearningObjectCode } from "@/data/questions";
+import LuckyEnvelopes, { EnvelopeState } from "./LuckyEnvelopes";
+import QuestionPanel from "./QuestionPanel";
+import AnswerButton from "./AnswerButton";
+import SubmitButton from "./SubmitButton";
+import BambooPath from "./BambooPath";
+import GameComplete from "./GameComplete";
+import backgroundImg from "@/assets/background.jpg";
+
+const QuizGame = () => {
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [isAnswered, setIsAnswered] = useState(false);
+  const [scoreState, setScoreState] = useState<EnvelopeState[]>([]);
+  const [mascotStep, setMascotStep] = useState(0);
+  const [isMascotMoving, setIsMascotMoving] = useState(false);
+  const [gameComplete, setGameComplete] = useState(false);
+
+  useEffect(() => {
+    const loadQuestions = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      const learningObjectCode = getLearningObjectCode();
+      
+      if (!learningObjectCode) {
+        setQuestions(fallbackQuestions);
+        setScoreState(Array(fallbackQuestions.length).fill("pending"));
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const loadedQuestions = await loadQuestionsFromApi();
+        setQuestions(loadedQuestions);
+        setScoreState(Array(loadedQuestions.length).fill("pending"));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load questions');
+        setQuestions(fallbackQuestions);
+        setScoreState(Array(fallbackQuestions.length).fill("pending"));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadQuestions();
+  }, []);
+
+  const currentQuestion = questions[currentQuestionIndex];
+  const isLastQuestion = currentQuestionIndex === questions.length - 1;
+
+  const handleAnswerSelect = useCallback(
+    (index: number) => {
+      if (isAnswered) return;
+      setSelectedAnswer(index);
+    },
+    [isAnswered],
+  );
+
+  const handleSubmit = useCallback(() => {
+    if (selectedAnswer === null || !currentQuestion) return;
+
+    const isCorrect = selectedAnswer === currentQuestion.correctIndex;
+
+    const newScoreState = [...scoreState];
+    newScoreState[currentQuestionIndex] = isCorrect ? "correct" : "wrong";
+    setScoreState(newScoreState);
+
+    if (isCorrect) {
+      setIsMascotMoving(true);
+      setMascotStep((prev) => prev + 1);
+      setTimeout(() => setIsMascotMoving(false), 1600);
+    }
+
+    setIsAnswered(true);
+  }, [selectedAnswer, currentQuestion, currentQuestionIndex, scoreState]);
+
+  const handleContinue = useCallback(() => {
+    if (isLastQuestion) {
+      setGameComplete(true);
+      return;
+    }
+
+    setCurrentQuestionIndex((prev) => prev + 1);
+    setSelectedAnswer(null);
+    setIsAnswered(false);
+  }, [isLastQuestion]);
+
+  const handleRestart = useCallback(() => {
+    setCurrentQuestionIndex(0);
+    setSelectedAnswer(null);
+    setIsAnswered(false);
+    setScoreState(Array(questions.length).fill("pending"));
+    setMascotStep(0);
+    setGameComplete(false);
+  }, [questions.length]);
+
+  const correctCount = scoreState.filter((s) => s === "correct").length;
+
+  if (isLoading) {
+    return (
+      <div
+        className="min-h-screen w-full bg-cover bg-no-repeat flex flex-col items-center justify-center"
+        style={{ backgroundImage: `url(${backgroundImg})`, backgroundPosition: "center top" }}
+      >
+        <div className="text-2xl font-bold text-white drop-shadow-lg">Đang tải câu hỏi...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        className="min-h-screen w-full bg-cover bg-no-repeat flex flex-col items-center justify-center"
+        style={{ backgroundImage: `url(${backgroundImg})`, backgroundPosition: "center top" }}
+      >
+        <div className="text-xl font-bold text-red-500 drop-shadow-lg">Lỗi: {error}</div>
+      </div>
+    );
+  }
+
+  if (!currentQuestion) {
+    return null;
+  }
+
+  return (
+    <div
+      className="min-h-screen w-full bg-cover bg-no-repeat flex flex-col"
+      style={{ backgroundImage: `url(${backgroundImg})`, backgroundPosition: "center top" }}
+    >
+      <div className="min-h-screen w-full flex flex-col pt-8 lg:pt-16">
+        <header className="flex justify-center pb-4 lg:pb-6">
+          <LuckyEnvelopes scoreState={scoreState} currentIndex={currentQuestionIndex} />
+        </header>
+
+        <main className="flex-1 flex flex-col px-4 pb-1 max-w-520px mx-auto w-full">
+          {gameComplete ? (
+            <GameComplete correctCount={correctCount} totalQuestions={questions.length} onRestart={handleRestart} />
+          ) : (
+            <>
+              <QuestionPanel
+                question={currentQuestion.question}
+                questionNumber={currentQuestionIndex + 1}
+                imageUrl={currentQuestion.imageUrl}
+              />
+
+              <div className="flex flex-col gap-2 w-full px-4 mt-4" key={currentQuestionIndex}>
+                {currentQuestion.answers.map((answer, index) => (
+                  <AnswerButton
+                    key={index}
+                    answer={answer}
+                    index={index}
+                    isSelected={selectedAnswer === index}
+                    isCorrect={selectedAnswer === index ? selectedAnswer === currentQuestion.correctIndex : null}
+                    isDisabled={isAnswered}
+                    isAnswered={isAnswered}
+                    correctIndex={currentQuestion.correctIndex}
+                    onClick={() => handleAnswerSelect(index)}
+                  />
+                ))}
+              </div>
+
+              <div className="flex justify-center mt-6">
+                <SubmitButton
+                  isAnswered={isAnswered}
+                  isDisabled={selectedAnswer === null && !isAnswered}
+                  onClick={isAnswered ? handleContinue : handleSubmit}
+                />
+              </div>
+
+              <div className="mt-1">
+                <BambooPath mascotStep={mascotStep} isMoving={isMascotMoving} totalSteps={questions.length} />
+              </div>
+            </>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default QuizGame;
