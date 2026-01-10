@@ -20,7 +20,7 @@ const SubmitButton = ({ isAnswered, isDisabled, onClick }: SubmitButtonProps) =>
     >
       <img
         src={isAnswered ? continueImg : submitImg}
-        alt={isAnswered ? "Tiếp tục" : "Trả lời"}
+        alt={isAnswered ? "Tiếp tục" : "Trả lời.."}
         className="h-11 lg:h-14 w-auto object-contain"
       />
     </button>
