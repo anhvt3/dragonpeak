@@ -8,6 +8,8 @@ import BambooPath from "./BambooPath";
 import GameComplete from "./GameComplete";
 import backgroundImg from "@/assets/background.jpg";
 
+const MAX_POSITION = 4;
+
 const QuizGame = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -19,6 +21,7 @@ const QuizGame = () => {
   const [mascotStep, setMascotStep] = useState(0);
   const [isMascotMoving, setIsMascotMoving] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
+  const [reachedFinish, setReachedFinish] = useState(false);
 
   useEffect(() => {
     const loadQuestions = async () => {
@@ -72,15 +75,23 @@ const QuizGame = () => {
 
     if (isCorrect) {
       setIsMascotMoving(true);
-      setMascotStep((prev) => prev + 1);
+      const newStep = mascotStep + 1;
+      setMascotStep(newStep);
       setTimeout(() => setIsMascotMoving(false), 1600);
     }
 
     setIsAnswered(true);
-  }, [selectedAnswer, currentQuestion, currentQuestionIndex, scoreState]);
+  }, [selectedAnswer, currentQuestion, currentQuestionIndex, scoreState, mascotStep]);
 
   const handleContinue = useCallback(() => {
+    if (mascotStep >= MAX_POSITION) {
+      setReachedFinish(true);
+      setGameComplete(true);
+      return;
+    }
+
     if (isLastQuestion) {
+      setReachedFinish(false);
       setGameComplete(true);
       return;
     }
@@ -88,7 +99,7 @@ const QuizGame = () => {
     setCurrentQuestionIndex((prev) => prev + 1);
     setSelectedAnswer(null);
     setIsAnswered(false);
-  }, [isLastQuestion]);
+  }, [isLastQuestion, mascotStep]);
 
   const handleRestart = useCallback(() => {
     setCurrentQuestionIndex(0);
@@ -97,6 +108,7 @@ const QuizGame = () => {
     setScoreState(Array(questions.length).fill("pending"));
     setMascotStep(0);
     setGameComplete(false);
+    setReachedFinish(false);
   }, [questions.length]);
 
   const correctCount = scoreState.filter((s) => s === "correct").length;
@@ -133,13 +145,20 @@ const QuizGame = () => {
       style={{ backgroundImage: `url(${backgroundImg})`, backgroundPosition: "center top" }}
     >
       <div className="min-h-screen w-full flex flex-col pt-8 lg:pt-16">
-        <header className="flex justify-center pb-4 lg:pb-6">
-          <LuckyEnvelopes scoreState={scoreState} currentIndex={currentQuestionIndex} />
-        </header>
+        {!gameComplete && (
+          <header className="flex justify-center pb-4 lg:pb-6">
+            <LuckyEnvelopes scoreState={scoreState} currentIndex={currentQuestionIndex} />
+          </header>
+        )}
 
         <main className="flex-1 flex flex-col px-4 pb-1 max-w-520px mx-auto w-full">
           {gameComplete ? (
-            <GameComplete correctCount={correctCount} totalQuestions={questions.length} onRestart={handleRestart} />
+            <GameComplete 
+              correctCount={correctCount} 
+              totalQuestions={questions.length} 
+              reachedFinish={reachedFinish}
+              onRestart={handleRestart} 
+            />
           ) : (
             <>
               <QuestionPanel
@@ -172,7 +191,7 @@ const QuizGame = () => {
                 />
               </div>
 
-              <div className="mt-1">
+              <div className="mt-2">
                 <BambooPath mascotStep={mascotStep} isMoving={isMascotMoving} totalSteps={questions.length} />
               </div>
             </>

@@ -1,4 +1,5 @@
 import questionPanelImg from "@/assets/question-panel.png";
+import HtmlContent from "./HtmlContent";
 
 interface QuestionPanelProps {
   question: string;
@@ -14,7 +15,7 @@ const QuestionPanel = ({ question, questionNumber, imageUrl }: QuestionPanelProp
           {imageUrl ? (
             <img src={imageUrl} alt="Question" className="max-w-full max-h-[150px] object-contain mx-auto" />
           ) : (
-            <p>{question}</p>
+            <HtmlContent html={question} />
           )}
         </div>
       </div>
@@ -23,4 +24,3 @@ const QuestionPanel = ({ question, questionNumber, imageUrl }: QuestionPanelProp
 };
 
 export default QuestionPanel;
-

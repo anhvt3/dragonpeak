@@ -1,3 +1,5 @@
+import HtmlContent from "./HtmlContent";
+
 interface AnswerButtonProps {
   answer: string;
   index: number;
@@ -80,12 +82,10 @@ const AnswerButton = ({
       >
         {labels[index]}
       </span>
-      <span 
+      <HtmlContent 
+        html={answer}
         className="font-semibold text-left text-sm leading-tight"
-        style={{ color: "#4a2c00", fontFamily: "'Medium SF Compact Rounded', 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}
-      >
-        {answer}
-      </span>
+      />
     </button>
   );
 };
