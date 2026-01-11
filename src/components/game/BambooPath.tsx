@@ -14,7 +14,7 @@ const BambooPath = ({ mascotStep, isMoving, totalSteps }: BambooPathProps) => {
   const [displayStep, setDisplayStep] = useState(0);
 
   const currentPosition = Math.min(displayStep, BAMBOO_POSITIONS.length - 1);
-  const mascotPosition = BAMBOO_POSITIONS[currentPosition];
+  const mascotPosition = BAMBOO_POSITIONS[currentPosition > 0 ? currentPosition - 1 : currentPosition];
 
   useEffect(() => {
     if (isMoving && mascotStep > displayStep) {
