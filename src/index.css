@@ -119,14 +119,14 @@
   }
 
   .envelope-current-pulse {
-    filter: grayscale(0%) brightness(1.2) drop-shadow(0 0 8px rgba(255, 215, 0, 1)) drop-shadow(0 0 15px rgba(255, 165, 0, 0.8));
+    filter: grayscale(0%) brightness(1.2) drop-shadow(0 0 8px rgba(255, 215, 0, 1))
+      drop-shadow(0 0 15px rgba(255, 165, 0, 0.8));
     transform: scale(1.1);
     opacity: 1;
-    animation: envelopeSwing 1.5s ease-in-out infinite;
+    animation: envelopeSwing 3.5s ease-in-out infinite;
   }
 
   @keyframes envelopeSwing {
-
     0%,
     100% {
       transform: scale(1.1) rotate(-8deg);
@@ -142,7 +142,6 @@
   }
 
   @keyframes mascotRocking {
-
     0%,
     100% {
       transform: translateY(0);
@@ -171,7 +170,14 @@
   .question-text {
     position: relative;
     z-index: 2;
-    font-family: 'Medium SF Compact Rounded', 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family:
+      "Medium SF Compact Rounded",
+      "SF Pro Rounded",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
     font-size: 1.1rem;
     font-weight: 600;
     color: #4a2c00;
@@ -256,7 +262,6 @@
 
 @layer utilities {
   @keyframes envelope-gentle-pulse {
-
     0%,
     100% {
       transform: scale(1);
@@ -270,7 +275,6 @@
   }
 
   @keyframes mascot-bounce {
-
     0%,
     100% {
       transform: translateY(0);
