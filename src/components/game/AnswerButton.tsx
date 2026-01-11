@@ -84,7 +84,7 @@ const AnswerButton = ({
       </span>
       <HtmlContent 
         html={answer}
-        className="font-semibold text-left text-sm leading-tight"
+        className="font-semibold text-left text-sm leading-tight min-w-0 break-all"
       />
     </button>
   );
