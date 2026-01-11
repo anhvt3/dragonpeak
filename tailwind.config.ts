@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        game: ['Nunito', 'system-ui', 'sans-serif'],
+        game: ["Nunito", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -73,6 +73,16 @@ export default {
           active: "hsl(var(--envelope-active))",
           dimmed: "hsl(var(--envelope-dimmed))",
           current: "hsl(var(--envelope-current))",
+        },
+        tet: {
+          red: "hsl(var(--tet-red))",
+          "red-dark": "hsl(var(--tet-red-dark))",
+          gold: "hsl(var(--tet-gold))",
+          "gold-light": "hsl(var(--tet-gold-light))",
+          jade: "hsl(var(--tet-jade))",
+          cream: "hsl(var(--tet-cream))",
+          orange: "hsl(var(--tet-orange))",
+          peach: "hsl(var(--tet-peach))",
         },
       },
       borderRadius: {
