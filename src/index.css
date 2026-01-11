@@ -34,6 +34,15 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
+    --tet-red: 0 85% 50%;
+    --tet-red-dark: 0 85% 40%;
+    --tet-gold: 45 100% 50%;
+    --tet-gold-light: 45 100% 70%;
+    --tet-jade: 120 50% 35%;
+    --tet-cream: 35 100% 95%;
+    --tet-orange: 25 95% 55%;
+    --tet-peach: 20 100% 85%;
+
     /* Answer States */
     --answer-default: 30 100% 90%;
     --answer-default-border: 30 80% 65%;
