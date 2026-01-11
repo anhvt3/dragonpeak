@@ -17,7 +17,7 @@ const GameComplete = ({ correctCount, totalQuestions, reachedFinish, onRestart }
             <span className="text-3xl font-bold" style={{ color: "#69b131" }}>
               {correctCount}/{totalQuestions}
             </span>{" "}
-            câu hỏi
+            câu
           </p>
         </div>
         <button
