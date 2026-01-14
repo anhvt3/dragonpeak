@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
-import { Question, loadQuestionsFromApi, fallbackQuestions, getLearningObjectCode } from "@/data/questions";
+import { Question, loadQuestionsFromApi, fallbackQuestions } from "@/data/questions";
+import { gameConfig } from "@/config/gameConfig";
+import { useGameAudio } from "@/hooks/useGameAudio";
 import LuckyEnvelopes, { EnvelopeState } from "./LuckyEnvelopes";
 import QuestionPanel from "./QuestionPanel";
 import AnswerButton from "./AnswerButton";
@@ -11,6 +13,8 @@ import backgroundImg from "@/assets/background.jpg";
 const MAX_POSITION = 4;
 
 const QuizGame = () => {
+  const { playButtonClick, playCorrectAnswer, playWrongAnswer, playFinishGame } = useGameAudio();
+  
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,9 +32,8 @@ const QuizGame = () => {
       setIsLoading(true);
       setError(null);
       
-      const learningObjectCode = getLearningObjectCode();
-      
-      if (!learningObjectCode) {
+      // If using sample questions, load fallback directly
+      if (gameConfig.useSampleQuestions) {
         setQuestions(fallbackQuestions);
         setScoreState(Array(fallbackQuestions.length).fill("pending"));
         setIsLoading(false);
@@ -59,9 +62,10 @@ const QuizGame = () => {
   const handleAnswerSelect = useCallback(
     (index: number) => {
       if (isAnswered) return;
+      playButtonClick();
       setSelectedAnswer(index);
     },
-    [isAnswered],
+    [isAnswered, playButtonClick],
   );
 
   const handleSubmit = useCallback(() => {
@@ -74,23 +78,28 @@ const QuizGame = () => {
     setScoreState(newScoreState);
 
     if (isCorrect) {
+      playCorrectAnswer();
       setIsMascotMoving(true);
       const newStep = mascotStep + 1;
       setMascotStep(newStep);
       setTimeout(() => setIsMascotMoving(false), 1600);
+    } else {
+      playWrongAnswer();
     }
 
     setIsAnswered(true);
-  }, [selectedAnswer, currentQuestion, currentQuestionIndex, scoreState, mascotStep]);
+  }, [selectedAnswer, currentQuestion, currentQuestionIndex, scoreState, mascotStep, playCorrectAnswer, playWrongAnswer]);
 
   const handleContinue = useCallback(() => {
     if (mascotStep >= MAX_POSITION) {
+      playFinishGame();
       setReachedFinish(true);
       setGameComplete(true);
       return;
     }
 
     if (isLastQuestion) {
+      playFinishGame();
       setReachedFinish(false);
       setGameComplete(true);
       return;
@@ -99,7 +108,7 @@ const QuizGame = () => {
     setCurrentQuestionIndex((prev) => prev + 1);
     setSelectedAnswer(null);
     setIsAnswered(false);
-  }, [isLastQuestion, mascotStep]);
+  }, [isLastQuestion, mascotStep, playFinishGame]);
 
   const handleRestart = useCallback(() => {
     setCurrentQuestionIndex(0);

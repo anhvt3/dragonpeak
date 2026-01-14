@@ -82,10 +82,12 @@ const AnswerButton = ({
       >
         {labels[index]}
       </span>
-      <HtmlContent 
-        html={answer}
-        className="font-semibold text-left text-sm leading-tight min-w-0 break-all"
-      />
+      <span style={{ fontSize: '16px' }}>
+        <HtmlContent 
+          html={answer}
+          className="font-semibold text-left leading-tight min-w-0 break-all"
+        />
+      </span>
     </button>
   );
 };
