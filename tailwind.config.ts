@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         game: ["Nunito", "system-ui", "sans-serif"],
+        'sf-compact': ['"SF Compact Display"', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

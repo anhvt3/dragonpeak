@@ -9,9 +9,10 @@ declare global {
 interface HtmlContentProps {
   html: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
-const HtmlContent = ({ html, className = "" }: HtmlContentProps) => {
+const HtmlContent = ({ html, className = "", style }: HtmlContentProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [modalImage, setModalImage] = useState<string | null>(null);
 
@@ -62,6 +63,7 @@ const HtmlContent = ({ html, className = "" }: HtmlContentProps) => {
       <div
         ref={containerRef}
         className={className}
+        style={style}
         onClick={handleClick}
         dangerouslySetInnerHTML={{ __html: html }}
       />

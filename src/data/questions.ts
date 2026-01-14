@@ -1,4 +1,6 @@
-const API_BASE_URL = 'https://ai-math.clevai.edu.vn/quiz/load-quizs';
+import { gameConfig } from '@/config/gameConfig';
+
+const API_BASE_URL = gameConfig.apiBaseUrl;
 
 export interface Question {
   id: number;
@@ -58,6 +60,11 @@ function convertApiResponseToQuestions(apiResponse: ApiResponse): Question[] {
 }
 
 export async function loadQuestionsFromApi(): Promise<Question[]> {
+  // If sample mode is enabled, return fallback questions immediately
+  if (gameConfig.useSampleQuestions) {
+    return fallbackQuestions;
+  }
+
   const learningObjectCode = getLearningObjectCode();
 
   if (!learningObjectCode) {
