@@ -68,7 +68,7 @@ export async function loadQuestionsFromApi(): Promise<Question[]> {
   const learningObjectCode = getLearningObjectCode();
 
   if (!learningObjectCode) {
-    throw new Error('learning_object_code not found in URL. URL format: ?learning_object_code=XXX');
+    return fallbackQuestions;
   }
 
   const apiUrl = `${API_BASE_URL}?learning_object_code=${encodeURIComponent(learningObjectCode)}`;
