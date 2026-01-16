@@ -91,7 +91,7 @@ export async function loadQuestionsFromApi(): Promise<Question[]> {
 export const fallbackQuestions: Question[] = [
   {
     id: 1,
-    question: "Choose the correct answer (A, B, C, or D) to complete each sentence.\n\nThe day before Friday is ________.",
+    question: "Choose the correct answer (A, B, C, or D) to complete each sentence.\n\nThe day before Friday is ________.Choose the correct answer (A, B, C, or D) to complete each sentence.\n\nThe day before Friday is ________.Choose the correct answer (A, B, C, or D) to complete each sentence.\n\nThe day before Friday is ________.Choose the correct answer (A, B, C, or D) to complete each sentence.\n\nThe day before Friday is ________.",
     answers: ["Monday", "Tuesday", "Thursday", "Sunday"],
     correctIndex: 2,
   },

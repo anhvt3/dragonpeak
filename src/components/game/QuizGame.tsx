@@ -150,10 +150,10 @@ const QuizGame = () => {
 
   return (
     <div
-      className="min-h-screen w-full bg-cover bg-no-repeat flex flex-col"
+      className="h-screen w-full bg-cover bg-no-repeat flex flex-col overflow-y-auto"
       style={{ backgroundImage: `url(${backgroundImg})`, backgroundPosition: "center top" }}
     >
-      <div className="min-h-screen w-full flex flex-col pt-8 lg:pt-16">
+      <div className="w-full flex flex-col pt-8 pb-4 lg:pt-16">
         {!gameComplete && (
           <header className="flex justify-center pb-4 lg:pb-6">
             <LuckyEnvelopes scoreState={scoreState} currentIndex={currentQuestionIndex} />
