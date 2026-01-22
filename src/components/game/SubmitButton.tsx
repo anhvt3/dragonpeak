@@ -1,5 +1,4 @@
-import submitImg from "@/assets/submit-button.png";
-import continueImg from "@/assets/continue-button.png";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface SubmitButtonProps {
   isAnswered: boolean;
@@ -8,6 +7,8 @@ interface SubmitButtonProps {
 }
 
 const SubmitButton = ({ isAnswered, isDisabled, onClick }: SubmitButtonProps) => {
+  const { assets } = useTheme();
+
   return (
     <button
       onClick={onClick}
@@ -19,7 +20,7 @@ const SubmitButton = ({ isAnswered, isDisabled, onClick }: SubmitButtonProps) =>
       `}
     >
       <img
-        src={isAnswered ? continueImg : submitImg}
+        src={isAnswered ? assets.continueButton : assets.submitButton}
         alt={isAnswered ? "Tiếp tục" : "Trả lời"}
         className="h-11 lg:h-14 w-auto object-contain"
       />
