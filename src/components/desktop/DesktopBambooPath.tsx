@@ -35,7 +35,7 @@ const DesktopBambooPath = ({ mascotStep, isMoving, totalSteps }: DesktopBambooPa
 
   return (
     <div
-      className="relative w-full max-w-[700px] mx-auto pointer-events-none"
+      className="relative w-full max-w-[600px] mx-auto pointer-events-none"
       style={{ transformOrigin: "center top" }}
     >
       <div className="relative scale-[0.85]" style={{ transformOrigin: "center center" }}>
