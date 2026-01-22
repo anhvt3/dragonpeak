@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import bambooPathImg from "@/assets/bamboo-path.png";
-import mascotImg from "@/assets/mask-group.png";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface BambooPathProps {
   mascotStep: number;
@@ -11,6 +10,7 @@ interface BambooPathProps {
 const BAMBOO_POSITIONS = [12, 31, 50, 69, 88];
 
 const BambooPath = ({ mascotStep, isMoving, totalSteps }: BambooPathProps) => {
+  const { assets } = useTheme();
   const [displayStep, setDisplayStep] = useState(0);
 
   const currentPosition = Math.min(displayStep, BAMBOO_POSITIONS.length - 1);
@@ -40,7 +40,7 @@ const BambooPath = ({ mascotStep, isMoving, totalSteps }: BambooPathProps) => {
       style={{ transformOrigin: "center top", marginTop: "-2rem" }}
     >
       <div className="relative lg:scale-[0.85]" style={{ transformOrigin: "center center" }}>
-        <img src={bambooPathImg} alt="Bamboo path" className="w-full h-auto object-contain" />
+        <img src={assets.bambooPath} alt="Bamboo path" className="w-full h-auto object-contain" />
 
         <div
           className="absolute bottom-[61%] w-[20%] lg:w-[18%] transition-all duration-700 ease-out"
@@ -50,7 +50,7 @@ const BambooPath = ({ mascotStep, isMoving, totalSteps }: BambooPathProps) => {
             aspectRatio: "1/1",
           }}
         >
-          <img src={mascotImg} alt="Mascot" className="w-full h-full object-contain mascot-rocking" />
+          <img src={assets.maskGroup} alt="Mascot" className="w-full h-full object-contain mascot-rocking" />
         </div>
       </div>
     </div>

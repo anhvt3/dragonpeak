@@ -1,4 +1,4 @@
-import envelopeImg from "@/assets/envelope.png";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export type EnvelopeState = "pending" | "correct" | "wrong" | "current";
 
@@ -10,6 +10,7 @@ interface LuckyEnvelopesProps {
 const MAX_DISPLAY = 5;
 
 const LuckyEnvelopes = ({ scoreState, currentIndex }: LuckyEnvelopesProps) => {
+  const { assets } = useTheme();
   const totalQuestions = scoreState.length;
 
   let startIndex = 0;
@@ -42,7 +43,7 @@ const LuckyEnvelopes = ({ scoreState, currentIndex }: LuckyEnvelopesProps) => {
         const actualIndex = startIndex + index;
         return (
           <div key={actualIndex} className={`w-10 h-12 transition-all ${getEnvelopeClass(actualIndex)}`}>
-            <img src={envelopeImg} alt={`Envelope ${actualIndex + 1}`} className="w-full h-full object-contain" />
+            <img src={assets.envelope} alt={`Envelope ${actualIndex + 1}`} className="w-full h-full object-contain" />
           </div>
         );
       })}

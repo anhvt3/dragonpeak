@@ -2,18 +2,19 @@ import { useState, useCallback, useEffect } from "react";
 import { Question, loadQuestionsFromApi, fallbackQuestions } from "@/data/questions";
 import { gameConfig } from "@/config/gameConfig";
 import { useGameAudio } from "@/hooks/useGameAudio";
+import { useTheme } from "@/contexts/ThemeContext";
 import LuckyEnvelopes, { EnvelopeState } from "./LuckyEnvelopes";
 import QuestionPanel from "./QuestionPanel";
 import AnswerButton from "./AnswerButton";
 import SubmitButton from "./SubmitButton";
 import BambooPath from "./BambooPath";
 import GameComplete from "./GameComplete";
-import backgroundImg from "@/assets/background.jpg";
 
 const MAX_POSITION = 4;
 
 const QuizGame = () => {
   const { playButtonClick, playCorrectAnswer, playWrongAnswer, playFinishGame } = useGameAudio();
+  const { assets } = useTheme();
   
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -126,7 +127,7 @@ const QuizGame = () => {
     return (
       <div
         className="min-h-screen w-full bg-cover bg-no-repeat flex flex-col items-center justify-center"
-        style={{ backgroundImage: `url(${backgroundImg})`, backgroundPosition: "center top" }}
+        style={{ backgroundImage: `url(${assets.background})`, backgroundPosition: "center top" }}
       >
         <div className="text-2xl font-bold text-white drop-shadow-lg">Đang tải câu hỏi...</div>
       </div>
@@ -137,7 +138,7 @@ const QuizGame = () => {
     return (
       <div
         className="min-h-screen w-full bg-cover bg-no-repeat flex flex-col items-center justify-center"
-        style={{ backgroundImage: `url(${backgroundImg})`, backgroundPosition: "center top" }}
+        style={{ backgroundImage: `url(${assets.background})`, backgroundPosition: "center top" }}
       >
         <div className="text-xl font-bold text-red-500 drop-shadow-lg">Lỗi: {error}</div>
       </div>
@@ -151,7 +152,7 @@ const QuizGame = () => {
   return (
     <div
       className="min-h-screen w-full bg-cover bg-no-repeat flex flex-col"
-      style={{ backgroundImage: `url(${backgroundImg})`, backgroundPosition: "center top" }}
+      style={{ backgroundImage: `url(${assets.background})`, backgroundPosition: "center top" }}
     >
       <div className="min-h-screen w-full flex flex-col pt-8 lg:pt-16">
         {!gameComplete && (
