@@ -9,7 +9,6 @@ import MobileGameComplete from "@/components/mobile/MobileGameComplete";
 
 const MobileGame = () => {
   const {
-    questions,
     isLoading,
     error,
     currentQuestionIndex,
@@ -22,6 +21,7 @@ const MobileGame = () => {
     reachedFinish,
     currentQuestion,
     correctCount,
+    totalQuestions,
     handleAnswerSelect,
     handleSubmit,
     handleContinue,
@@ -70,7 +70,7 @@ const MobileGame = () => {
           {gameComplete ? (
             <MobileGameComplete 
               correctCount={correctCount} 
-              totalQuestions={questions.length} 
+              totalQuestions={totalQuestions} 
               reachedFinish={reachedFinish}
               onRestart={handleRestart} 
             />
@@ -107,7 +107,7 @@ const MobileGame = () => {
               </div>
 
               <div className="mt-2">
-                <MobileBambooPath mascotStep={mascotStep} isMoving={isMascotMoving} totalSteps={questions.length} />
+                <MobileBambooPath mascotStep={mascotStep} isMoving={isMascotMoving} totalSteps={totalQuestions} />
               </div>
             </>
           )}
