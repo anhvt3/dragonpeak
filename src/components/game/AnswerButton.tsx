@@ -69,7 +69,7 @@ const AnswerButton = ({
       onClick={onClick}
       disabled={isDisabled}
       className={`
-        answer-btn rounded-2xl p-2.5 min-h-[3.75rem]
+        answer-btn rounded-2xl p-2.5 min-h-[60px]
         flex items-center gap-3
         ${getButtonClass()}
         ${isDisabled ? "cursor-not-allowed" : "cursor-pointer active:scale-95"}
@@ -77,12 +77,12 @@ const AnswerButton = ({
       `}
     >
       <span 
-        className="answer-label w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors duration-200"
+        className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 transition-colors duration-200"
         style={{ color: getLetterColor(), backgroundColor: getCircleBackground() }}
       >
         {labels[index]}
       </span>
-      <span className="answer-text">
+      <span style={{ fontSize: '16px' }}>
         <HtmlContent 
           html={answer}
           className="font-semibold text-left leading-tight min-w-0 break-all"
