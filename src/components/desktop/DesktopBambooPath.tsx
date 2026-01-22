@@ -42,7 +42,7 @@ const DesktopBambooPath = ({ mascotStep, isMoving, totalSteps }: DesktopBambooPa
         <img src={desktopAssets.bambooPath} alt="Bamboo path" className="w-full h-auto object-contain" />
 
         <div
-          className="absolute bottom-[61%] w-[20%] transition-all duration-700 ease-out"
+          className="absolute bottom-[61%] w-[22%] transition-all duration-700 ease-out"
           style={{
             left: `${mascotPosition}%`,
             transform: "translateX(-50%)",
