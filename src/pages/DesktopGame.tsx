@@ -9,7 +9,6 @@ import DesktopGameComplete from "@/components/desktop/DesktopGameComplete";
 
 const DesktopGame = () => {
   const {
-    questions,
     isLoading,
     error,
     currentQuestionIndex,
@@ -22,6 +21,7 @@ const DesktopGame = () => {
     reachedFinish,
     currentQuestion,
     correctCount,
+    totalQuestions,
     handleAnswerSelect,
     handleSubmit,
     handleContinue,
@@ -70,7 +70,7 @@ const DesktopGame = () => {
           {gameComplete ? (
             <DesktopGameComplete
               correctCount={correctCount}
-              totalQuestions={questions.length}
+              totalQuestions={totalQuestions}
               reachedFinish={reachedFinish}
               onRestart={handleRestart}
             />
@@ -107,7 +107,7 @@ const DesktopGame = () => {
               </div>
 
               <div className="mt-[-210px] pointers-event-none">
-                <DesktopBambooPath mascotStep={mascotStep} isMoving={isMascotMoving} totalSteps={questions.length} />
+                <DesktopBambooPath mascotStep={mascotStep} isMoving={isMascotMoving} totalSteps={totalQuestions} />
               </div>
             </>
           )}
