@@ -68,11 +68,11 @@ const DesktopGame = () => {
 
         <main className="flex-1 flex flex-col px-8 pb-4 max-w-[1000px] mx-auto w-full">
           {gameComplete ? (
-            <DesktopGameComplete 
-              correctCount={correctCount} 
-              totalQuestions={questions.length} 
+            <DesktopGameComplete
+              correctCount={correctCount}
+              totalQuestions={questions.length}
               reachedFinish={reachedFinish}
-              onRestart={handleRestart} 
+              onRestart={handleRestart}
             />
           ) : (
             <>
@@ -106,7 +106,7 @@ const DesktopGame = () => {
                 />
               </div>
 
-              <div className="mt-4">
+              <div className="mt-0">
                 <DesktopBambooPath mascotStep={mascotStep} isMoving={isMascotMoving} totalSteps={questions.length} />
               </div>
             </>
