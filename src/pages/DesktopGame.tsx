@@ -106,7 +106,7 @@ const DesktopGame = () => {
                 />
               </div>
 
-              <div className="mt-[-150px] pointers-event-none">
+              <div className="mt-[-160px] pointers-event-none">
                 <DesktopBambooPath mascotStep={mascotStep} isMoving={isMascotMoving} totalSteps={totalQuestions} />
               </div>
             </>
