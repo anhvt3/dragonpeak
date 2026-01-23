@@ -5,7 +5,7 @@ import { useGameAudio } from "@/hooks/useGameAudio";
 import { EnvelopeState } from "@/components/game/LuckyEnvelopes";
 import { fallbackQuestions } from "@/data/questions";
 
-const MAX_POSITION = 4;
+const MAX_POSITION = 5;
 const FIXED_TOTAL = gameConfig.fixedTotalQuestions; // Always 5
 const API_TIMEOUT_MS = 5000; // Fallback to sample after 5s if no API response
 

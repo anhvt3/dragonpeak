@@ -138,7 +138,7 @@ const DragonPeakGame = () => {
         className="game-container"
         style={{ backgroundImage: `url(${currentAssets.background})` }}
       >
-        <div className="min-h-screen w-full flex flex-col relative overflow-hidden" style={{ paddingTop: '1.5cqw' }}>
+        <div className="min-h-full w-full flex flex-col relative overflow-y-auto overflow-x-hidden" style={{ paddingTop: '1.5cqw' }}>
           {!gameComplete && (
             <header className="flex justify-center" style={{ paddingBottom: '1.5cqw' }}>
               <LuckyEnvelopes scoreState={scoreState} currentIndex={currentQuestionIndex} />

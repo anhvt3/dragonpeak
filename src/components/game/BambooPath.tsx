@@ -7,7 +7,7 @@ interface BambooPathProps {
   totalSteps: number;
 }
 
-const BAMBOO_POSITIONS = [12, 31, 50, 69, 88];
+const BAMBOO_POSITIONS = [10, 26, 42, 58, 74, 90];
 
 const BambooPath = ({ mascotStep, isMoving, totalSteps }: BambooPathProps) => {
   const { assets } = useTheme();

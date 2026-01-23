@@ -115,7 +115,8 @@
   body,
   #root {
     height: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     scrollbar-width: thin;
   }
 
@@ -163,7 +164,7 @@
   }
 
   .score-item {
-    width: 3.5cqw;
+    width: 3cqw;
     height: auto;
     transition: all 0.4s ease;
     filter: grayscale(70%) brightness(0.5);
@@ -262,12 +263,12 @@
   .question-container {
     position: relative;
     width: 100%;
-    height: 25cqw;
+    height: 40cqw;
     display: block;
     background-size: 100% 100%;
     background-repeat: no-repeat;
     background-position: center;
-    padding: 4% 8%;
+    padding: 6% 8%;
     box-sizing: border-box;
   }
 
@@ -467,7 +468,7 @@
   align-items: center;
   max-width: 55%;
   padding: 0 2%;
-  margin-top: 0cqw;
+  margin-top: -0.5cqw;
   container-type: inline-size;
 }
 
@@ -520,7 +521,7 @@ body.is-mobile .question-section {
 
 body.is-mobile .question-container {
   width: 100%;
-  height: 45cqw;
+  height: 55cqw;
   padding: 7% 8%;
   aspect-ratio: unset;
 }
