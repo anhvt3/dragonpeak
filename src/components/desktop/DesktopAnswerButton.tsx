@@ -69,20 +69,19 @@ const DesktopAnswerButton = ({
       onClick={onClick}
       disabled={isDisabled}
       className={`
-        answer-btn rounded-2xl p-4 min-h-[70px]
-        flex items-center gap-4
+        answer-btn flex items-center transition-all duration-200
         ${getButtonClass()}
         ${isDisabled ? "cursor-not-allowed" : "cursor-pointer hover:scale-[1.02] active:scale-[0.98]"}
-        transition-all duration-200
       `}
+      style={{ borderRadius: '3cqw', padding: '2% 3%', minHeight: '8cqw', gap: '3%' }}
     >
       <span 
-        className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shrink-0 transition-colors duration-200"
-        style={{ color: getLetterColor(), backgroundColor: getCircleBackground() }}
+        className="rounded-full flex items-center justify-center font-bold shrink-0 transition-colors duration-200"
+        style={{ width: '8cqw', height: '8cqw', fontSize: '4cqw', color: getLetterColor(), backgroundColor: getCircleBackground() }}
       >
         {labels[index]}
       </span>
-      <span style={{ fontSize: '18px' }}>
+      <span style={{ fontSize: '3.5cqw' }}>
         <HtmlContent 
           html={answer}
           className="font-semibold text-left leading-tight min-w-0 break-all"

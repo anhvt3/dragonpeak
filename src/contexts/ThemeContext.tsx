@@ -1,36 +1,24 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useDeviceType, DeviceType } from '@/hooks/useDeviceType';
-import { themeAssets, ThemeAssets } from '@/config/themeAssets';
 
 interface ThemeContextValue {
-  deviceType: DeviceType;
-  assets: ThemeAssets;
-  isMobile: boolean;
-  isPC: boolean;
+  assets: any;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 interface ThemeProviderProps {
   children: ReactNode;
+  assets: any;
 }
 
-export function ThemeProvider({ children }: ThemeProviderProps) {
-  const deviceType = useDeviceType();
-  const assets = themeAssets[deviceType];
-
+export function ThemeProvider({ children, assets }: ThemeProviderProps) {
   const value: ThemeContextValue = {
-    deviceType,
     assets,
-    isMobile: deviceType === 'mobile',
-    isPC: deviceType === 'pc',
   };
 
   return (
     <ThemeContext.Provider value={value}>
-      <div className={`theme-${deviceType}`}>
-        {children}
-      </div>
+      {children}
     </ThemeContext.Provider>
   );
 }
@@ -42,3 +30,4 @@ export function useTheme(): ThemeContextValue {
   }
   return context;
 }
+

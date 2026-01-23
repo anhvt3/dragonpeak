@@ -8,13 +8,16 @@ interface MobileGameCompleteProps {
 const MobileGameComplete = ({ correctCount, totalQuestions, reachedFinish, onRestart }: MobileGameCompleteProps) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-slide-up">
-      <div className="bg-gradient-to-b from-tet-cream to-tet-peach p-8 rounded-3xl shadow-2xl border-4 border-tet-gold max-w-md mx-4 text-center">
-        <h2 className="text-3xl font-bold text-tet-red mb-4">Hoàn thành!</h2>
+      <div 
+        className="bg-gradient-to-b from-tet-cream to-tet-peach shadow-2xl text-center"
+        style={{ padding: '4cqw', borderRadius: '3cqw', border: '0.5cqw solid hsl(45 100% 50%)', maxWidth: '80cqw', margin: '0 2cqw' }}
+      >
+        <h2 style={{ fontSize: '5cqw', fontWeight: 'bold', color: 'hsl(0 85% 50%)', marginBottom: '2cqw' }}>Hoàn thành!</h2>
 
-        <div className="bg-primary/10 rounded-2xl p-4 mb-6">
-          <p className="text-lg" style={{ color: "#0a0a48" }}>
+        <div style={{ backgroundColor: 'hsl(var(--primary) / 0.1)', borderRadius: '2cqw', padding: '2cqw', marginBottom: '3cqw' }}>
+          <p style={{ fontSize: '3cqw', color: '#0a0a48' }}>
             Bạn trả lời đúng{" "}
-            <span className="text-3xl font-bold" style={{ color: "#69b131" }}>
+            <span style={{ fontSize: '5cqw', fontWeight: 'bold', color: '#69b131' }}>
               {correctCount}/{totalQuestions}
             </span>{" "}
             câu
@@ -22,7 +25,8 @@ const MobileGameComplete = ({ correctCount, totalQuestions, reachedFinish, onRes
         </div>
         <button
           onClick={onRestart}
-          className="bg-gradient-to-r from-tet-red to-tet-orange text-primary-foreground font-bold text-lg px-8 py-3 rounded-full hover:scale-105 transition-transform shadow-lg"
+          className="bg-gradient-to-r from-tet-red to-tet-orange text-primary-foreground font-bold hover:scale-105 transition-transform shadow-lg"
+          style={{ fontSize: '3cqw', padding: '1.5cqw 4cqw', borderRadius: '3cqw' }}
         >
           Tiếp tục
         </button>

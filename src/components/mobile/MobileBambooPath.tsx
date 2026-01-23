@@ -36,7 +36,7 @@ const MobileBambooPath = ({ mascotStep, isMoving, totalSteps }: MobileBambooPath
   return (
     <div
       className="relative w-full pointer-events-none"
-      style={{ transformOrigin: "center top", marginTop: "-2rem" }}
+      style={{ transformOrigin: "center top", marginTop: "-4cqw" }}
     >
       <div className="relative" style={{ transformOrigin: "center center" }}>
         <img src={mobileAssets.bambooPath} alt="Bamboo path" className="w-full h-auto object-contain" />

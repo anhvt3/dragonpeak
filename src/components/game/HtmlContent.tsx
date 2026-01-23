@@ -74,7 +74,8 @@ const HtmlContent = ({ html, className = "", style }: HtmlContentProps) => {
           onClick={() => setModalImage(null)}
         >
           <button
-            className="absolute top-4 right-4 text-white text-4xl font-bold hover:text-gray-300"
+            className="absolute font-bold hover:text-gray-300"
+            style={{ top: '3cqw', right: '4cqw', color: 'white', fontSize: '5cqw' }}
             onClick={() => setModalImage(null)}
           >
             ×
@@ -82,7 +83,8 @@ const HtmlContent = ({ html, className = "", style }: HtmlContentProps) => {
           <img
             src={modalImage}
             alt="Zoomed"
-            className="max-w-[90vw] max-h-[90vh] object-contain"
+            className="object-contain"
+            style={{ maxWidth: '90vw', maxHeight: '90vh' }}
             onClick={(e) => e.stopPropagation()}
           />
         </div>

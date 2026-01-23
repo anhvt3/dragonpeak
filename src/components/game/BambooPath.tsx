@@ -36,17 +36,27 @@ const BambooPath = ({ mascotStep, isMoving, totalSteps }: BambooPathProps) => {
 
   return (
     <div
-      className="relative w-full pointer-events-none"
-      style={{ transformOrigin: "center top", marginTop: "-2rem" }}
+      className="bamboo-section relative pointer-events-none"
+      style={{ 
+        transformOrigin: "center top", 
+        marginTop: "-2cqw", 
+        width: '55%',
+        maxWidth: '55cqw',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        containerType: "inline-size" 
+      }}
     >
-      <div className="relative lg:scale-[0.85]" style={{ transformOrigin: "center center" }}>
+      <div className="relative" style={{ transformOrigin: "center center", transform: "scaleY(0.8)" }}>
         <img src={assets.bambooPath} alt="Bamboo path" className="w-full h-auto object-contain" />
 
         <div
-          className="absolute bottom-[61%] w-[20%] lg:w-[18%] transition-all duration-700 ease-out"
+          className="absolute transition-all duration-700 ease-out"
           style={{
+            bottom: '61%',
+            width: '22%',
             left: `${mascotPosition}%`,
-            transform: "translateX(-50%)",
+            transform: "translateX(-50%) scaleY(1.2)",
             aspectRatio: "1/1",
           }}
         >

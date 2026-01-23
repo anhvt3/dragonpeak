@@ -35,10 +35,10 @@ const DesktopBambooPath = ({ mascotStep, isMoving, totalSteps }: DesktopBambooPa
 
   return (
     <div
-      className="relative w-full max-w-[600px] mx-auto pointer-events-none"
-      style={{ transformOrigin: "center top" }}
+      className="relative w-full mx-auto pointer-events-none"
+      style={{ maxWidth: '50cqw', transformOrigin: "center top" }}
     >
-      <div className="relative scale-[0.85]" style={{ transformOrigin: "center center" }}>
+      <div className="relative" style={{ transform: 'scale(0.85)', transformOrigin: "center center" }}>
         <img src={desktopAssets.bambooPath} alt="Bamboo path" className="w-full h-auto object-contain" />
 
         <div

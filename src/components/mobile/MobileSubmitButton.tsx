@@ -20,7 +20,7 @@ const MobileSubmitButton = ({ isAnswered, isDisabled, onClick }: MobileSubmitBut
       <img
         src={isAnswered ? mobileAssets.continueButton : mobileAssets.submitButton}
         alt={isAnswered ? "Tiếp tục" : "Trả lời"}
-        className="h-11 w-auto object-contain"
+        style={{ height: '10cqw', width: 'auto', objectFit: 'contain' }}
       />
     </button>
   );

@@ -38,11 +38,11 @@ const LuckyEnvelopes = ({ scoreState, currentIndex }: LuckyEnvelopesProps) => {
   };
 
   return (
-    <div className="flex gap-2 items-center justify-center">
+    <div className="score-container">
       {visibleEnvelopes.map((_, index) => {
         const actualIndex = startIndex + index;
         return (
-          <div key={actualIndex} className={`w-10 h-12 transition-all ${getEnvelopeClass(actualIndex)}`}>
+          <div key={actualIndex} className={`score-item transition-all ${getEnvelopeClass(actualIndex)}`}>
             <img src={assets.envelope} alt={`Envelope ${actualIndex + 1}`} className="w-full h-full object-contain" />
           </div>
         );

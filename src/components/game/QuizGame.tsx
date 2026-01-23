@@ -151,17 +151,17 @@ const QuizGame = () => {
 
   return (
     <div
-      className="min-h-screen w-full bg-cover bg-no-repeat flex flex-col"
-      style={{ backgroundImage: `url(${assets.background})`, backgroundPosition: "center top" }}
+      className="game-container"
+      style={{ backgroundImage: `url(${assets.background})` }}
     >
-      <div className="min-h-screen w-full flex flex-col pt-8 lg:pt-16">
+      <div className="min-h-screen w-full flex flex-col" style={{ paddingTop: '4cqw' }}>
         {!gameComplete && (
-          <header className="flex justify-center pb-4 lg:pb-6">
+          <header className="flex justify-center" style={{ paddingBottom: '2cqw' }}>
             <LuckyEnvelopes scoreState={scoreState} currentIndex={currentQuestionIndex} />
           </header>
         )}
 
-        <main className="flex-1 flex flex-col px-4 pb-1 max-w-520px mx-auto w-full">
+        <main className="flex-1 flex flex-col mx-auto w-full" style={{ padding: '0 2cqw 0.5cqw', maxWidth: '90cqw' }}>
           {gameComplete ? (
             <GameComplete 
               correctCount={correctCount} 
@@ -177,7 +177,7 @@ const QuizGame = () => {
                 imageUrl={currentQuestion.imageUrl}
               />
 
-              <div className="flex flex-col gap-2 w-full px-4 mt-4" key={currentQuestionIndex}>
+              <div className="flex flex-col w-full" style={{ gap: '1cqw', padding: '0 2cqw', marginTop: '2cqw' }} key={currentQuestionIndex}>
                 {currentQuestion.answers.map((answer, index) => (
                   <AnswerButton
                     key={index}
@@ -193,7 +193,7 @@ const QuizGame = () => {
                 ))}
               </div>
 
-              <div className="flex justify-center mt-6">
+              <div className="flex justify-center" style={{ marginTop: '3cqw' }}>
                 <SubmitButton
                   isAnswered={isAnswered}
                   isDisabled={selectedAnswer === null && !isAnswered}
@@ -201,7 +201,7 @@ const QuizGame = () => {
                 />
               </div>
 
-              <div className="mt-2">
+              <div style={{ marginTop: '1cqw' }}>
                 <BambooPath mascotStep={mascotStep} isMoving={isMascotMoving} totalSteps={questions.length} />
               </div>
             </>

@@ -22,7 +22,7 @@ const SubmitButton = ({ isAnswered, isDisabled, onClick }: SubmitButtonProps) =>
       <img
         src={isAnswered ? assets.continueButton : assets.submitButton}
         alt={isAnswered ? "Tiếp tục" : "Trả lời"}
-        className="h-11 lg:h-14 w-auto object-contain"
+        style={{ height: '5.5cqw', width: 'auto', objectFit: 'contain' }}
       />
     </button>
   );

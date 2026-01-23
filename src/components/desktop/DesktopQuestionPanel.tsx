@@ -9,7 +9,7 @@ interface DesktopQuestionPanelProps {
 
 const DesktopQuestionPanel = ({ question, questionNumber, imageUrl }: DesktopQuestionPanelProps) => {
   return (
-    <div className="relative w-full max-w-[800px] mx-auto animate-slide-up">
+    <div className="relative w-full animate-slide-up" style={{ maxWidth: '60cqw', margin: '0 auto' }}>
       <div 
         className="question-container" 
         style={{ 
@@ -17,9 +17,9 @@ const DesktopQuestionPanel = ({ question, questionNumber, imageUrl }: DesktopQue
           padding: '8% 6%',
         }}
       >
-        <div className="question-text" style={{ fontSize: '20px', maxHeight: '150px' }}>
+        <div className="question-text">
           {imageUrl ? (
-            <img src={imageUrl} alt="Question" className="max-w-full max-h-[180px] object-contain mx-auto" />
+            <img src={imageUrl} alt="Question" style={{ maxWidth: '100%', maxHeight: '25cqw', objectFit: 'contain', margin: '0 auto', display: 'block' }} />
           ) : (
             <HtmlContent html={question} />
           )}

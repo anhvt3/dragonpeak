@@ -69,20 +69,19 @@ const MobileAnswerButton = ({
       onClick={onClick}
       disabled={isDisabled}
       className={`
-        answer-btn rounded-2xl p-2.5 min-h-[60px]
-        flex items-center gap-3
+        answer-btn flex items-center transition-all duration-200
         ${getButtonClass()}
         ${isDisabled ? "cursor-not-allowed" : "cursor-pointer active:scale-95"}
-        transition-all duration-200
       `}
+      style={{ borderRadius: '3cqw', padding: '2% 3%', minHeight: '10cqw', gap: '3%' }}
     >
       <span 
-        className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 transition-colors duration-200"
-        style={{ color: getLetterColor(), backgroundColor: getCircleBackground() }}
+        className="rounded-full flex items-center justify-center font-bold shrink-0 transition-colors duration-200"
+        style={{ width: '6.5cqw', height: '6.5cqw', fontSize: '3.2cqw', color: getLetterColor(), backgroundColor: getCircleBackground() }}
       >
         {labels[index]}
       </span>
-      <span style={{ fontSize: '16px' }}>
+      <span style={{ fontSize: '3cqw' }}>
         <HtmlContent 
           html={answer}
           className="font-semibold text-left leading-tight min-w-0 break-all"
