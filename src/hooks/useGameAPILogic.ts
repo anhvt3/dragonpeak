@@ -6,7 +6,7 @@ import { EnvelopeState } from "@/components/game/LuckyEnvelopes";
 import { fallbackQuestions } from "@/data/questions";
 
 const MAX_POSITION = 5;
-const FIXED_TOTAL = gameConfig.fixedTotalQuestions;
+const FIXED_TOTAL = gameConfig.fixedTotalQuestions; // Always 5
 
 export interface GameState {
   questions: any[];
@@ -42,246 +42,299 @@ export interface GameActions {
 export function useGameAPILogic(customQuestions?: any[] | null): GameState & GameActions {
   const { playButtonClick, playCorrectAnswer, playWrongAnswer, playFinishGame } = useGameAudio();
 
+  // --- UI/Animation State ---
   const [mascotStep, setMascotStep] = useState(0);
   const [isMascotMoving, setIsMascotMoving] = useState(false);
   const [reachedFinish, setReachedFinish] = useState(false);
 
-  const [localSelectedIndex, setLocalSelectedIndex] = useState<number | null>(null);
-
-  const [useSampleMode, setUseSampleMode] = useState(() => {
+  // --- Strategy Determination ---
+  const isSampleMode = useMemo(() => {
+    // Priority 1: Custom questions passed in (from URL loading in Index.tsx)
     if (customQuestions && customQuestions.length > 0) return true;
-    if (typeof window === 'undefined') return true;
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('sample') === 'true';
-  });
 
-  const [sampleQuestionIndex, setSampleQuestionIndex] = useState(0);
-  const [sampleSelectedAnswer, setSampleSelectedAnswer] = useState<number | null>(null);
-  const [sampleIsAnswered, setSampleIsAnswered] = useState(false);
-  const [sampleAnswers, setSampleAnswers] = useState<(boolean | null)[]>([]);
-  const [sampleIsCompleted, setSampleIsCompleted] = useState(false);
-  const [sampleCorrectCount, setSampleCorrectCount] = useState(0);
+    // Priority 2: Query param ?sample=true
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('sample') === 'true';
+    }
 
-  const {
-    quiz,
-    currentResult,
-    answers,
-    correctCount: apiCorrectCount,
-    currentQuestionIndex: apiCurrentQuestionIndex,
-    isSubmitting,
-    hasSubmitted,
-    isCompleted: apiIsCompleted,
-    handleAnswerSelect: apiHandleAnswerSelect,
-    updateAnswer,
-    handleContinue: apiHandleContinue,
-    finish
-  } = useGameAPI({
+    return false;
+  }, [customQuestions]);
+
+  // --- Real API Hook ---
+  // Always call hooks at top level
+  const apiGame = useGameAPI({
     onAnswerCorrect: ({ currentQuestionIndex }) => {
+      console.log(`Question ${currentQuestionIndex + 1} answered correctly!`);
       playCorrectAnswer();
       setIsMascotMoving(true);
       setMascotStep(prev => Math.min(prev + 1, MAX_POSITION));
       setTimeout(() => setIsMascotMoving(false), 1600);
     },
     onAnswerIncorrect: () => {
+      console.log('Incorrect answer');
       playWrongAnswer();
     }
   });
 
-  const effectiveQuestions = useMemo(() => {
-    if (customQuestions && customQuestions.length > 0) return customQuestions;
-    return fallbackQuestions;
-  }, [customQuestions]);
+  // --- Sample Mode Simulation State ---
+  const [sampleIndex, setSampleIndex] = useState(0);
+  const [sampleSelectedAnswer, setSampleSelectedAnswer] = useState<any | null>(null); // Store entire answer object for sample
+  const [sampleAnswers, setSampleAnswers] = useState<(boolean | null)[]>([]); // Track correct/wrong history
+  const [sampleIsAnswered, setSampleIsAnswered] = useState(false);
+  const [sampleIsCompleted, setSampleIsCompleted] = useState(false);
+  // Sample result simulation
+  const [sampleCurrentResult, setSampleCurrentResult] = useState<{ isCorrect: boolean; correctAnswerId?: number } | null>(null);
 
-  useEffect(() => {
-    if (customQuestions && customQuestions.length > 0) {
-      setUseSampleMode(true);
+  // --- Effective Data Selector ---
+  // Select either API data or Sample data based on isSampleMode
+
+  const effectiveQuestionsRaw = useMemo(() => {
+    if (isSampleMode) {
+      if (customQuestions && customQuestions.length > 0) return customQuestions;
+      return fallbackQuestions;
     }
-  }, [customQuestions]);
+    return apiGame.quiz ? [apiGame.quiz] : []; // In API mode, we only know the current question usually, or previous ones.
+  }, [isSampleMode, customQuestions, apiGame.quiz]);
 
-  const sampleCurrentQuestion = useMemo(() => {
-    if (!useSampleMode && !customQuestions) return undefined;
-    const questions = customQuestions && customQuestions.length > 0 ? customQuestions : fallbackQuestions;
-    return questions[sampleQuestionIndex];
-  }, [useSampleMode, sampleQuestionIndex, customQuestions]);
+  const rawCurrentQuestion = useMemo(() => {
+    if (isSampleMode) {
+      return effectiveQuestionsRaw[sampleIndex];
+    }
+    return apiGame.quiz;
+  }, [isSampleMode, effectiveQuestionsRaw, sampleIndex, apiGame.quiz]);
 
-  const effectiveSampleMode = useSampleMode || (!!customQuestions && customQuestions.length > 0);
+  // --- Derived State for UI ---
 
-  const isLoading = effectiveSampleMode ? false : (!quiz && !apiIsCompleted);
-  const currentQuestionIndex = effectiveSampleMode ? sampleQuestionIndex : apiCurrentQuestionIndex;
-  const isAnswered = effectiveSampleMode ? sampleIsAnswered : hasSubmitted;
-  const isCompleted = effectiveSampleMode ? sampleIsCompleted : apiIsCompleted;
-
-  const totalQuestions = Math.min(effectiveQuestions.length > 0 ? effectiveQuestions.length : FIXED_TOTAL, FIXED_TOTAL);
-  const correctCount = effectiveSampleMode ? sampleCorrectCount : apiCorrectCount;
-
-  const scoreState: EnvelopeState[] = useMemo(() => {
-    const questionsLength = effectiveQuestions.length > 0 ? effectiveQuestions.length : FIXED_TOTAL;
-    const total = Math.min(questionsLength, FIXED_TOTAL);
-    const state: EnvelopeState[] = Array(total).fill("pending");
-
-    const answerList = effectiveSampleMode ? sampleAnswers : answers;
-
-    answerList.forEach((answer, idx) => {
-      if (idx < total) {
-        if (answer === true) state[idx] = "correct";
-        else if (answer === false) state[idx] = "wrong";
-      }
-    });
-
-    return state;
-  }, [effectiveSampleMode, sampleAnswers, answers, effectiveQuestions]);
-
+  // 1. Current Question Data
   const currentQuestion = useMemo(() => {
-    if (effectiveSampleMode) {
-      if (!sampleCurrentQuestion) return undefined;
+    if (!rawCurrentQuestion) return undefined;
+
+    const quizText = rawCurrentQuestion.text || rawCurrentQuestion.content || rawCurrentQuestion.question || '';
+    const quizAudioUrl = rawCurrentQuestion.audioUrl || rawCurrentQuestion.audio_url || rawCurrentQuestion.imageUrl; // fallback map
+
+    // Normalize answers
+    const rawAnswers = rawCurrentQuestion.answers || rawCurrentQuestion.quiz_possible_options || [];
+    const normalizedAnswers = rawAnswers.map((a: any, idx: number) => {
+      // If answer is string, wrap it. If it's object, ensure id and content.
+      if (typeof a === 'string') return { id: idx + 1, content: a };
+
+      // Ensure ID exists. Some APIs imply A=1, B=2. Sample data might have IDs.
+      // Index.tsx map logic uses 1,2,3,4.
       return {
-        id: sampleCurrentQuestion.id ?? sampleQuestionIndex + 1,
-        question: sampleCurrentQuestion.question || sampleCurrentQuestion.text || '',
-        imageUrl: sampleCurrentQuestion.imageUrl || sampleCurrentQuestion.audioUrl,
-        answers: sampleCurrentQuestion.answers ? sampleCurrentQuestion.answers.map((a: any) => typeof a === 'string' ? a : (a.content || a.text || '')) : [],
-        correctIndex: sampleCurrentQuestion.correctIndex !== undefined ? sampleCurrentQuestion.correctIndex : (sampleCurrentQuestion.correctAnswerId ? sampleCurrentQuestion.correctAnswerId - 1 : 0),
+        id: a.id || idx + 1,
+        content: a.content || a.text || a.option_value || ''
       };
-    }
-
-    if (!quiz) return undefined;
-
-    const quizText = quiz.text ?? quiz.content ?? '';
-    const quizAnswers = quiz.answers ?? [];
-    const quizAudioUrl = quiz.audioUrl ?? quiz.audio_url;
-
-    const transformedAnswers = quizAnswers.map((a: any) => {
-      if (typeof a === 'string') return a;
-      return a?.content ?? a?.text ?? a?.option_value ?? '';
     });
 
+    // Determine Correct Index for UI highlighting
+    // This is TRICKY. We need to match the 'correctAnswerId' from result/question to the index in answers array.
     let correctIdx = 0;
-    if (currentResult?.correctAnswerId) {
-      if (typeof currentResult.correctAnswerId === 'number') {
-        correctIdx = currentResult.correctAnswerId - 1;
-      } else {
-        correctIdx = quizAnswers.findIndex((a: any) =>
-          a?.id === currentResult.correctAnswerId ||
-          a?.option_code === currentResult.correctAnswerId
-        );
-      }
-      if (correctIdx < 0) correctIdx = 0;
+
+    const relevantResult = isSampleMode ? sampleCurrentResult : apiGame.currentResult;
+    const predefinedCorrectId = rawCurrentQuestion.correctAnswerId || rawCurrentQuestion.correctIndex; // Some samples have it pre-defined
+
+    // Logic: If explicitly told via Result (after submit), use that.
+    // If not, look for pre-defined correct ID (Sample mode often has this).
+
+    let targetCorrectId: any = undefined;
+
+    if (relevantResult?.correctAnswerId) {
+      targetCorrectId = relevantResult.correctAnswerId;
+    } else if (isSampleMode && predefinedCorrectId !== undefined) {
+      targetCorrectId = predefinedCorrectId;
     }
+
+    if (targetCorrectId !== undefined) {
+      // Find index of answer with this ID
+      // Note: targetCorrectId might be string "A" or number 1.
+      // Our normalized answers have number IDs usually (mapped in Index.tsx).
+      // Let's try flexible matching.
+
+      correctIdx = normalizedAnswers.findIndex((a: any) =>
+        String(a.id) === String(targetCorrectId) ||
+        a.content === targetCorrectId // Fallback if API returns content as correct answer
+      );
+
+      // If still not found, and targetCorrectId is small integer, maybe it IS the index?
+      if (correctIdx === -1 && typeof targetCorrectId === 'number' && targetCorrectId < normalizedAnswers.length) {
+        // Caution: 0-based or 1-based?
+        // Usually APIs return IDs (1-based).
+        // If Index.tsx mapped A->1, and correctId is 1, answers[0].id is 1. findIndex returns 0. Correct.
+      }
+    }
+
+    if (correctIdx < 0) correctIdx = 0; // Fallback safe
 
     return {
-      id: quiz.id ?? currentQuestionIndex + 1,
+      id: rawCurrentQuestion.id || rawCurrentQuestion.quiz_code || 0,
       question: quizText,
       imageUrl: quizAudioUrl,
-      answers: transformedAnswers,
+      answers: normalizedAnswers.map((a: any) => a.content),
       correctIndex: correctIdx,
+      _rawAnswers: normalizedAnswers // Keep raw for ID lookup
     };
-  }, [effectiveSampleMode, sampleCurrentQuestion, sampleQuestionIndex, quiz, currentQuestionIndex, currentResult]);
+  }, [rawCurrentQuestion, isSampleMode, sampleCurrentResult, apiGame.currentResult]);
+
+
+  // 2. Status Flags
+  const isLoading = isSampleMode ? !rawCurrentQuestion : (!apiGame.quiz && !apiGame.isCompleted);
+  const isAnswered = isSampleMode ? sampleIsAnswered : apiGame.hasSubmitted;
+  const isCompleted = isSampleMode ? sampleIsCompleted : apiGame.isCompleted;
+  const currentIdx = isSampleMode ? sampleIndex : apiGame.currentQuestionIndex;
+
+  // Total questions is fixed to 5 for UI consistency
+  const totalQuestions = FIXED_TOTAL;
+
+  const correctCount = isSampleMode
+    ? sampleAnswers.filter(Boolean).length
+    : apiGame.correctCount;
+
+  // 3. Score State (Envelopes)
+  const scoreState: EnvelopeState[] = useMemo(() => {
+    // Current answers history
+    const history = isSampleMode ? sampleAnswers : apiGame.answers;
+
+    const state: EnvelopeState[] = Array(FIXED_TOTAL).fill("pending");
+    history.forEach((res, idx) => {
+      if (idx < FIXED_TOTAL) {
+        if (res === true) state[idx] = "correct";
+        else if (res === false) state[idx] = "wrong";
+      }
+    });
+    return state;
+  }, [isSampleMode, sampleAnswers, apiGame.answers]);
+
+  // 4. Selected Answer Index (for UI)
+  const selectedAnswerIdx = useMemo(() => {
+    const selected = isSampleMode ? sampleSelectedAnswer : apiGame.selectedAnswer;
+    if (!selected) return null;
+
+    // Find index in currentQuestion answers
+    if (currentQuestion?._rawAnswers) {
+      return currentQuestion._rawAnswers.findIndex((a: any) => a.id === selected.id);
+    }
+    return null;
+  }, [isSampleMode, sampleSelectedAnswer, apiGame.selectedAnswer, currentQuestion]);
+
+
+  // --- Actions ---
 
   const handleAnswerSelect = useCallback((index: number) => {
     if (isAnswered) return;
     playButtonClick();
 
-    if (effectiveSampleMode) {
-      setSampleSelectedAnswer(index);
+    // Reconstruct answer object from currentQuestion
+    const answerObj = currentQuestion?._rawAnswers?.[index];
+    if (!answerObj) return;
+
+    if (isSampleMode) {
+      setSampleSelectedAnswer(answerObj);
     } else {
-      setLocalSelectedIndex(index);
-      const answerObj = quiz?.answers?.[index];
-      if (answerObj) {
-        apiHandleAnswerSelect(answerObj);
-      }
+      apiGame.handleAnswerSelect(answerObj);
     }
-  }, [isAnswered, effectiveSampleMode, quiz, apiHandleAnswerSelect, playButtonClick]);
+  }, [isAnswered, isSampleMode, currentQuestion, apiGame, playButtonClick]);
 
   const handleSubmit = useCallback(() => {
-    if (effectiveSampleMode) {
-      if (sampleSelectedAnswer === null || !sampleCurrentQuestion) return;
+    if (isSampleMode) {
+      if (!sampleSelectedAnswer || !rawCurrentQuestion) return;
 
-      let isCorrect = false;
-      if (sampleCurrentQuestion.correctIndex !== undefined) {
-        isCorrect = sampleSelectedAnswer === sampleCurrentQuestion.correctIndex;
-      } else if (sampleCurrentQuestion.correctAnswerId !== undefined) {
-        isCorrect = (sampleSelectedAnswer + 1) === sampleCurrentQuestion.correctAnswerId;
-      }
+      // --- Sample Logic Validation ---
+      // Compare sampleSelectedAnswer.id with rawCurrentQuestion.correctAnswerId
+      // Assuming mapping is consistent (A=1, B=2...)
+      const correctId = rawCurrentQuestion.correctAnswerId || rawCurrentQuestion.correctIndex;
 
+      // Flexible comparison
+      const isCorrect = String(sampleSelectedAnswer.id) === String(correctId);
+
+      // Update History
       setSampleAnswers(prev => {
-        const newAnswers = [...prev];
-        return [...newAnswers, isCorrect];
+        const next = [...prev];
+        next[sampleIndex] = isCorrect;
+        return next;
       });
 
+      setSampleCurrentResult({ isCorrect, correctAnswerId: correctId });
+      setSampleIsAnswered(true);
+
       if (isCorrect) {
-        setSampleCorrectCount(prev => prev + 1);
+        console.log(`Question ${sampleIndex + 1} answered correctly!`);
         playCorrectAnswer();
         setIsMascotMoving(true);
         setMascotStep(prev => Math.min(prev + 1, MAX_POSITION));
         setTimeout(() => setIsMascotMoving(false), 1600);
       } else {
+        console.log('Incorrect answer');
         playWrongAnswer();
       }
 
-      setSampleIsAnswered(true);
     } else {
-      if (localSelectedIndex === null) return;
-      updateAnswer();
+      // API Mode
+      apiGame.updateAnswer();
     }
-  }, [effectiveSampleMode, sampleSelectedAnswer, sampleCurrentQuestion, sampleQuestionIndex, localSelectedIndex, updateAnswer, playCorrectAnswer, playWrongAnswer]);
+  }, [isSampleMode, sampleSelectedAnswer, rawCurrentQuestion, sampleIndex, apiGame, playCorrectAnswer, playWrongAnswer]);
 
   const handleContinue = useCallback(() => {
-    if (effectiveSampleMode) {
-      const qList = customQuestions && customQuestions.length > 0 ? customQuestions : fallbackQuestions;
-      const limit = Math.min(qList.length, FIXED_TOTAL);
-      const isLastQuestion = sampleQuestionIndex >= limit - 1;
+    // Shared stopping logic
+    const nextIdx = isSampleMode ? sampleIndex + 1 : apiGame.currentQuestionIndex + 1;
+    const shouldStop = nextIdx >= FIXED_TOTAL || mascotStep >= MAX_POSITION;
 
-      if (mascotStep >= MAX_POSITION || isLastQuestion) {
-        playFinishGame();
-        setReachedFinish(mascotStep >= MAX_POSITION);
+    if (shouldStop) {
+      playFinishGame();
+      setReachedFinish(mascotStep >= MAX_POSITION);
+      if (isSampleMode) {
+        setSampleIsCompleted(true);
+      } else {
+        apiGame.finish();
+      }
+      return;
+    }
+
+    if (isSampleMode) {
+      // Sample Mode Navigation
+      // Check if we run out of sample data?
+      if (effectiveQuestionsRaw.length <= nextIdx) {
+        // Out of data, must stop
         setSampleIsCompleted(true);
         return;
       }
 
-      setSampleQuestionIndex(prev => prev + 1);
+      setSampleIndex(nextIdx);
       setSampleSelectedAnswer(null);
       setSampleIsAnswered(false);
+      setSampleCurrentResult(null);
     } else {
-      const limit = Math.min(effectiveQuestions.length > 0 ? effectiveQuestions.length : FIXED_TOTAL, FIXED_TOTAL);
-
-      if (mascotStep >= MAX_POSITION || apiCurrentQuestionIndex >= limit - 1) {
-        playFinishGame();
-        setReachedFinish(true);
-        finish();
-        return;
-      }
-
-      apiHandleContinue();
-      setLocalSelectedIndex(null);
+      // API Mode Navigation
+      apiGame.handleContinue();
     }
-  }, [effectiveSampleMode, sampleQuestionIndex, mascotStep, playFinishGame, finish, apiHandleContinue, customQuestions, apiCurrentQuestionIndex, effectiveQuestions]);
+  }, [isSampleMode, sampleIndex, apiGame, mascotStep, playFinishGame, effectiveQuestionsRaw]);
 
   const handleRestart = useCallback(() => {
+    // Basic UI reset
     setMascotStep(0);
     setIsMascotMoving(false);
     setReachedFinish(false);
-    setLocalSelectedIndex(null);
 
-    if (effectiveSampleMode) {
-      setSampleQuestionIndex(0);
+    if (isSampleMode) {
+      setSampleIndex(0);
       setSampleSelectedAnswer(null);
       setSampleIsAnswered(false);
       setSampleAnswers([]);
       setSampleIsCompleted(false);
-      setSampleCorrectCount(0);
+      setSampleCurrentResult(null);
     } else {
+      // Ideally finish/reset API. Reload is safest default to clear iframe state.
       window.location.reload();
     }
-  }, [effectiveSampleMode]);
+  }, [isSampleMode]);
 
-  const displaySelectedAnswer = effectiveSampleMode ? sampleSelectedAnswer : localSelectedIndex;
-  const isLastQuestion = currentQuestionIndex >= totalQuestions - 1;
 
   return {
-    questions: effectiveQuestions,
+    questions: isSampleMode ? effectiveQuestionsRaw : (apiGame.quiz ? [apiGame.quiz] : []), // Compat
     isLoading,
     error: null,
-    currentQuestionIndex,
-    selectedAnswer: displaySelectedAnswer,
+    currentQuestionIndex: currentIdx,
+    selectedAnswer: selectedAnswerIdx,
     isAnswered,
     scoreState,
     mascotStep,
@@ -289,12 +342,12 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
     gameComplete: isCompleted,
     reachedFinish,
     currentQuestion,
-    isLastQuestion,
+    isLastQuestion: currentIdx >= FIXED_TOTAL - 1,
     correctCount,
     totalQuestions,
     handleAnswerSelect,
     handleSubmit,
     handleContinue,
-    handleRestart,
+    handleRestart
   };
 }
