@@ -35,12 +35,16 @@ const DragonPeakGame = () => {
              if (data.status && data.quizzes) {
                 const fetchedQuestions = data.quizzes.map((quiz: any, index: number) => {
                     // Map options A,B,C,D to 1,2,3,4
-                    const letterToId: {[key: string]: number} = { 'A': 1, 'B': 2, 'C': 3, 'D': 4 };
+                    const letterMap = (code: string) => {
+                        const c = code?.toUpperCase().trim();
+                        const map: {[key: string]: number} = { 'A': 1, 'B': 2, 'C': 3, 'D': 4 };
+                        return map[c] || 0;
+                    };
                     
                     const answers = quiz.quiz_possible_options
                         .sort((a: any, b: any) => a.option_code.localeCompare(b.option_code))
                         .map((opt: any) => ({
-                            id: letterToId[opt.option_code] || 0,
+                            id: letterMap(opt.option_code),
                             content: opt.option_value
                         }));
                     
@@ -48,7 +52,7 @@ const DragonPeakGame = () => {
                         id: quiz.quiz_code || `Q_${index}`,
                         text: quiz.content,
                         answers: answers, // Array of objects
-                        correctAnswerId: letterToId[quiz.quiz_answers.option_code] || 0,
+                        correctAnswerId: letterMap(quiz.quiz_answers.option_code),
                         audioUrl: null
                     };
                 });

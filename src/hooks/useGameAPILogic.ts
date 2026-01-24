@@ -9,7 +9,7 @@ const MAX_POSITION = 5;
 const FIXED_TOTAL = gameConfig.fixedTotalQuestions; // Always 5
 
 export interface GameState {
-   
+
   questions: any[];
   isLoading: boolean;
   error: string | null;
@@ -25,7 +25,7 @@ export interface GameState {
     id: number;
     question: string;
     imageUrl?: string;
-     
+
     answers: any[];
     correctIndex: number;
   } | undefined;
@@ -41,7 +41,7 @@ export interface GameActions {
   handleRestart: () => void;
 }
 
- 
+
 export function useGameAPILogic(customQuestions?: any[] | null): GameState & GameActions {
   const { playButtonClick, playCorrectAnswer, playWrongAnswer, playFinishGame } = useGameAudio();
 
@@ -159,7 +159,9 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
         targetCorrectId = rawCurrentQuestion.correctIndex;
       }
 
-      if (targetCorrectId !== undefined) {
+      console.log('[Debug] UseGameAPILogic: targetCorrectId derived as:', targetCorrectId);
+
+      if (targetCorrectId !== undefined && targetCorrectId !== 0) {
         // Find index of answer with this ID
         correctIdx = normalizedAnswers.findIndex((a: any) =>
           String(a.id) === String(targetCorrectId) ||
@@ -167,8 +169,14 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
         );
 
         // If still not found, and targetCorrectId is small integer, maybe it IS the index?
-        if (correctIdx === -1 && typeof targetCorrectId === 'number' && targetCorrectId < normalizedAnswers.length) {
+        // But BE CAREFUL: If targetCorrectId is 0, it might mean "Map Failed" (from Index.tsx).
+        // Since our IDs are 1,2,3,4, ID 0 is invalid.
+        if (correctIdx === -1 && typeof targetCorrectId === 'number' && targetCorrectId < normalizedAnswers.length && targetCorrectId > 0) {
           correctIdx = targetCorrectId;
+        }
+
+        if (correctIdx === -1) {
+          console.warn('[Debug] UseGameAPILogic: Could not find correct index for ID:', targetCorrectId, 'in answers:', normalizedAnswers);
         }
       }
     }
