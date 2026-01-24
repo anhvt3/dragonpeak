@@ -237,11 +237,11 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
     });
 
     // Determine correct index for UI helpers (optional)
-    let correctIdx = 0;
+    let correctIdx = -1;
     // We don't really know correct index upfront from API usually, unless provided
     // but the UI relies on 'correctIndex' in some places. 
     // Ideally we shouldn't peek, but for 'show correct answer' after submit:
-    if (currentResult?.correctAnswerId) {
+    if (hasSubmitted && currentResult?.correctAnswerId) {
       correctIdx = transformedAnswers.findIndex(a => a.id === currentResult.correctAnswerId);
     }
 
@@ -251,9 +251,9 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
       imageUrl: quizAudioUrl, // Keep for compatibility
       answers: transformedAnswers,
       correctIndex: correctIdx,
-      correctAnswerId: currentResult?.correctAnswerId
+      correctAnswerId: hasSubmitted ? currentResult?.correctAnswerId : undefined
     };
-  }, [effectiveSampleMode, sampleCurrentQuestion, sampleQuestionIndex, quiz, currentQuestionIndex, currentResult]);
+  }, [effectiveSampleMode, sampleCurrentQuestion, sampleQuestionIndex, quiz, currentQuestionIndex, currentResult, hasSubmitted]);
 
   // --- ACTIONS ---
 
