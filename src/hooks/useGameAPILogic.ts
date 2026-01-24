@@ -9,6 +9,7 @@ const MAX_POSITION = 5;
 const FIXED_TOTAL = gameConfig.fixedTotalQuestions; // Always 5
 
 export interface GameState {
+   
   questions: any[];
   isLoading: boolean;
   error: string | null;
@@ -24,6 +25,7 @@ export interface GameState {
     id: number;
     question: string;
     imageUrl?: string;
+     
     answers: any[];
     correctIndex: number;
   } | undefined;
@@ -39,6 +41,7 @@ export interface GameActions {
   handleRestart: () => void;
 }
 
+ 
 export function useGameAPILogic(customQuestions?: any[] | null): GameState & GameActions {
   const { playButtonClick, playCorrectAnswer, playWrongAnswer, playFinishGame } = useGameAudio();
 
@@ -129,38 +132,44 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
 
     // Determine Correct Index for UI highlighting
     // This is TRICKY. We need to match the 'correctAnswerId' from result/question to the index in answers array.
-    let correctIdx = 0;
+    let correctIdx = -1;
 
     const relevantResult = isSampleMode ? sampleCurrentResult : apiGame.currentResult;
-    const predefinedCorrectId = rawCurrentQuestion.correctAnswerId || rawCurrentQuestion.correctIndex; // Some samples have it pre-defined
+    const selectedObj = isSampleMode ? sampleSelectedAnswer : apiGame.selectedAnswer;
 
-    // Logic: If explicitly told via Result (after submit), use that.
-    // If not, look for pre-defined correct ID (Sample mode often has this).
-
-    let targetCorrectId: any = undefined;
-
-    if (relevantResult?.correctAnswerId) {
-      targetCorrectId = relevantResult.correctAnswerId;
-    } else if (isSampleMode && predefinedCorrectId !== undefined) {
-      targetCorrectId = predefinedCorrectId;
+    // Logic: 
+    // 1. If we have a result and it says "Correct", then the selected answer IS the correct answer.
+    // This fixes the bug where "Correct" audio plays but UI highlights wrong answer (default 0).
+    if (relevantResult?.isCorrect && selectedObj) {
+      correctIdx = normalizedAnswers.findIndex((a: any) =>
+        String(a.id) === String(selectedObj.id) ||
+        a.content === selectedObj.content
+      );
     }
 
-    if (targetCorrectId !== undefined) {
-      // Find index of answer with this ID
-      // Note: targetCorrectId might be string "A" or number 1.
-      // Our normalized answers have number IDs usually (mapped in Index.tsx).
-      // Let's try flexible matching.
+    // 2. If we didn't find it yet (or answer was wrong/not submitted), check for explicit Correct ID
+    if (correctIdx === -1) {
+      let targetCorrectId: any = undefined;
 
-      correctIdx = normalizedAnswers.findIndex((a: any) =>
-        String(a.id) === String(targetCorrectId) ||
-        a.content === targetCorrectId // Fallback if API returns content as correct answer
-      );
+      if (relevantResult?.correctAnswerId) {
+        targetCorrectId = relevantResult.correctAnswerId;
+      } else if (rawCurrentQuestion.correctAnswerId !== undefined) {
+        targetCorrectId = rawCurrentQuestion.correctAnswerId;
+      } else if (rawCurrentQuestion.correctIndex !== undefined) {
+        targetCorrectId = rawCurrentQuestion.correctIndex;
+      }
 
-      // If still not found, and targetCorrectId is small integer, maybe it IS the index?
-      if (correctIdx === -1 && typeof targetCorrectId === 'number' && targetCorrectId < normalizedAnswers.length) {
-        // Caution: 0-based or 1-based?
-        // Usually APIs return IDs (1-based).
-        // If Index.tsx mapped A->1, and correctId is 1, answers[0].id is 1. findIndex returns 0. Correct.
+      if (targetCorrectId !== undefined) {
+        // Find index of answer with this ID
+        correctIdx = normalizedAnswers.findIndex((a: any) =>
+          String(a.id) === String(targetCorrectId) ||
+          a.content === targetCorrectId
+        );
+
+        // If still not found, and targetCorrectId is small integer, maybe it IS the index?
+        if (correctIdx === -1 && typeof targetCorrectId === 'number' && targetCorrectId < normalizedAnswers.length) {
+          correctIdx = targetCorrectId;
+        }
       }
     }
 
@@ -174,7 +183,7 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
       correctIndex: correctIdx,
       _rawAnswers: normalizedAnswers // Keep raw for ID lookup
     };
-  }, [rawCurrentQuestion, isSampleMode, sampleCurrentResult, apiGame.currentResult]);
+  }, [rawCurrentQuestion, isSampleMode, sampleCurrentResult, apiGame.currentResult, sampleSelectedAnswer, apiGame.selectedAnswer]);
 
 
   // 2. Status Flags
