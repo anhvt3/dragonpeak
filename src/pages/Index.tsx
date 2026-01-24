@@ -162,39 +162,19 @@ const DragonPeakGame = () => {
                 />
 
                 <div className="answers-grid" key={currentQuestionIndex}>
-                  {currentQuestion.answers.map((answer, index) => {
-                    const isSelected = selectedAnswer?.id === answer.id;
-                    // Determine correctness for UI feedback
-                    // If not answered, null.
-                    // If answered, check if this specific answer is correct relative to the correct ID.
-                    // Note: 'isCorrect' prop on AnswerButton is mostly for "if selected, shows red if wrong".
-                    // The "green" for correct answer is handled by AnswerButton internal logic comparing index vs correctIndex.
-                    
-                    // We need to pass the correct index to AnswerButton so it can highlight the correct one.
-                    // If correctIndex is -1 (not found), we try to find it via ID.
-                    let safeCorrectIndex = currentQuestion.correctIndex;
-                    if ((safeCorrectIndex === undefined || safeCorrectIndex < 0) && currentQuestion.correctAnswerId) {
-                        safeCorrectIndex = currentQuestion.answers.findIndex(a => a.id === currentQuestion.correctAnswerId);
-                    }
-
-                    const isCorrect = isSelected 
-                        ? (currentQuestion.correctAnswerId ? answer.id === currentQuestion.correctAnswerId : index === currentQuestion.correctIndex)
-                        : null;
-
-                    return (
-                      <AnswerButton
-                        key={answer.id || index}
-                        answer={answer.content}
-                        index={index}
-                        isSelected={isSelected}
-                        isCorrect={isCorrect}
-                        isDisabled={isAnswered}
-                        isAnswered={isAnswered}
-                        correctIndex={safeCorrectIndex}
-                        onClick={() => handleAnswerSelect(answer)}
-                      />
-                    );
-                  })}
+                  {currentQuestion.answers.map((answer, index) => (
+                    <AnswerButton
+                      key={index}
+                      answer={answer}
+                      index={index}
+                      isSelected={selectedAnswer === index}
+                      isCorrect={selectedAnswer === index ? selectedAnswer === currentQuestion.correctIndex : null}
+                      isDisabled={isAnswered}
+                      isAnswered={isAnswered}
+                      correctIndex={currentQuestion.correctIndex}
+                      onClick={() => handleAnswerSelect(index)}
+                    />
+                  ))}
                 </div>
 
                 <div className="flex justify-center submit-wrapper" style={{ marginTop: '2cqw' }}>

@@ -1,10 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-
-declare global {
-  interface Window {
-    renderMathInElement?: (element: HTMLElement, options: object) => void;
-  }
-}
+import renderMathInElement from "katex/dist/contrib/auto-render";
 
 interface HtmlContentProps {
   html: string;
@@ -19,17 +14,15 @@ const HtmlContent = ({ html, className = "", style }: HtmlContentProps) => {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    if (window.renderMathInElement) {
-      window.renderMathInElement(containerRef.current, {
-        delimiters: [
-          { left: "$$", right: "$$", display: true },
-          { left: "$", right: "$", display: false },
-          { left: "\\(", right: "\\)", display: false },
-          { left: "\\[", right: "\\]", display: true },
-        ],
-        throwOnError: false,
-      });
-    }
+    renderMathInElement(containerRef.current, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true },
+      ],
+      throwOnError: false,
+    });
   }, [html]);
 
   const handleClick = (e: React.MouseEvent) => {
