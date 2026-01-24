@@ -292,7 +292,7 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
         setSampleCurrentResult({
           isCorrect,
           isLastQuestion: sampleQuestionIndex >= FIXED_TOTAL - 1, // Limit to 5
-          correctAnswerId: sampleCurrentQuestion.correctAnswerId
+          correctAnswerId: sampleCurrentQuestion.correctAnswerId ?? (sampleCurrentQuestion.correctIndex !== undefined ? sampleCurrentQuestion.correctIndex + 1 : undefined)
         });
 
         setSampleAnswers(prev => {
