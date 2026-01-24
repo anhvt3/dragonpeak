@@ -159,9 +159,7 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
         targetCorrectId = rawCurrentQuestion.correctIndex;
       }
 
-      console.log('[Debug] UseGameAPILogic: targetCorrectId derived as:', targetCorrectId);
-
-      if (targetCorrectId !== undefined && targetCorrectId !== 0) {
+      if (targetCorrectId !== undefined) {
         // Find index of answer with this ID
         correctIdx = normalizedAnswers.findIndex((a: any) =>
           String(a.id) === String(targetCorrectId) ||
@@ -169,19 +167,13 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
         );
 
         // If still not found, and targetCorrectId is small integer, maybe it IS the index?
-        // But BE CAREFUL: If targetCorrectId is 0, it might mean "Map Failed" (from Index.tsx).
-        // Since our IDs are 1,2,3,4, ID 0 is invalid.
-        if (correctIdx === -1 && typeof targetCorrectId === 'number' && targetCorrectId < normalizedAnswers.length && targetCorrectId > 0) {
+        if (correctIdx === -1 && typeof targetCorrectId === 'number' && targetCorrectId < normalizedAnswers.length) {
           correctIdx = targetCorrectId;
-        }
-
-        if (correctIdx === -1) {
-          console.warn('[Debug] UseGameAPILogic: Could not find correct index for ID:', targetCorrectId, 'in answers:', normalizedAnswers);
         }
       }
     }
 
-    if (correctIdx < 0) correctIdx = 0; // Fallback safe
+    // if (correctIdx < 0) correctIdx = 0; // REMOVED: Do not default to 0 (A) if unknown. User says "óc chó".
 
     return {
       id: rawCurrentQuestion.id || rawCurrentQuestion.quiz_code || 0,
