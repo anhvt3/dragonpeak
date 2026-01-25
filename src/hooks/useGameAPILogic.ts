@@ -147,16 +147,22 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
       );
     }
 
-    // 2. If we didn't find it yet (or answer was wrong/not submitted), check for explicit Correct ID
+    // 2. If we didn't find it yet (or answer was wrong/not submitted), check explicit index first
+    if (correctIdx === -1) {
+      const rawCorrectIndex = rawCurrentQuestion.correctIndex;
+      if (typeof rawCorrectIndex === 'number' && rawCorrectIndex >= 0 && rawCorrectIndex < normalizedAnswers.length) {
+        correctIdx = rawCorrectIndex;
+      }
+    }
+
+    // 3. If still not found, map correctAnswerId to answer index
     if (correctIdx === -1) {
       let targetCorrectId: any = undefined;
 
-      if (relevantResult?.correctAnswerId) {
+      if (relevantResult?.correctAnswerId !== undefined) {
         targetCorrectId = relevantResult.correctAnswerId;
       } else if (rawCurrentQuestion.correctAnswerId !== undefined) {
         targetCorrectId = rawCurrentQuestion.correctAnswerId;
-      } else if (rawCurrentQuestion.correctIndex !== undefined) {
-        targetCorrectId = rawCurrentQuestion.correctIndex;
       }
 
       if (targetCorrectId !== undefined) {
@@ -165,11 +171,6 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
           String(a.id) === String(targetCorrectId) ||
           a.content === targetCorrectId
         );
-
-        // If still not found, and targetCorrectId is small integer, maybe it IS the index?
-        if (correctIdx === -1 && typeof targetCorrectId === 'number' && targetCorrectId < normalizedAnswers.length) {
-          correctIdx = targetCorrectId;
-        }
       }
     }
 
@@ -249,12 +250,17 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
       if (!sampleSelectedAnswer || !rawCurrentQuestion) return;
 
       // --- Sample Logic Validation ---
-      // Compare sampleSelectedAnswer.id with rawCurrentQuestion.correctAnswerId
-      // Assuming mapping is consistent (A=1, B=2...)
-      const correctId = rawCurrentQuestion.correctAnswerId || rawCurrentQuestion.correctIndex;
+      // Prefer correctIndex (0-based). Fall back to correctAnswerId (1-based) if needed.
+      const rawCorrectIndex = rawCurrentQuestion.correctIndex;
+      const rawCorrectAnswerId = rawCurrentQuestion.correctAnswerId;
+      let isCorrect = false;
 
-      // Flexible comparison
-      const isCorrect = String(sampleSelectedAnswer.id) === String(correctId);
+      if (typeof rawCorrectIndex === 'number') {
+        const selectedIdx = currentQuestion?._rawAnswers?.findIndex((a: any) => a.id === sampleSelectedAnswer.id) ?? -1;
+        isCorrect = selectedIdx === rawCorrectIndex;
+      } else if (rawCorrectAnswerId !== undefined) {
+        isCorrect = String(sampleSelectedAnswer.id) === String(rawCorrectAnswerId);
+      }
 
       // Update History
       setSampleAnswers(prev => {
@@ -263,7 +269,10 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
         return next;
       });
 
-      setSampleCurrentResult({ isCorrect, correctAnswerId: correctId });
+      setSampleCurrentResult({
+        isCorrect,
+        correctAnswerId: rawCorrectAnswerId !== undefined ? rawCorrectAnswerId : undefined
+      });
       setSampleIsAnswered(true);
 
       if (isCorrect) {
@@ -281,7 +290,7 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
       // API Mode
       apiGame.updateAnswer();
     }
-  }, [isSampleMode, sampleSelectedAnswer, rawCurrentQuestion, sampleIndex, apiGame, playCorrectAnswer, playWrongAnswer]);
+  }, [isSampleMode, sampleSelectedAnswer, rawCurrentQuestion, sampleIndex, currentQuestion, apiGame, playCorrectAnswer, playWrongAnswer]);
 
   const handleContinue = useCallback(() => {
     // Shared stopping logic
