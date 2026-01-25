@@ -596,13 +596,19 @@ body.is-mobile .answer-btn {
 body.is-mobile .bamboo-section {
   margin-top: -2cqw;
   width: 80% !important;
+  width: 80% !important;
   max-width: 80% !important;
+}
+
+body.is-mobile .mascot-wrapper {
+  width: 17% !important;
+  bottom: 68% !important;
 }
 
 .bamboo-wrapper {
   position: relative;
   z-index: 1;
-  margin-top: -11cqw;
+  margin-top: 2cqw;
 }
 
 .answer-container {
@@ -616,7 +622,7 @@ body.is-mobile .bamboo-section {
   box-sizing: border-box;
   border-radius: 2.5cqw;
   background-color: hsl(var(--answer-default));
-  border: 0.6cqw solid hsl(var(--answer-default-border));
+  border: 0.4cqw solid hsl(var(--answer-default-border));
   transition: all 0.2s ease;
   overflow: hidden;
   container-type: inline-size;
@@ -671,13 +677,13 @@ body.is-mobile .bamboo-section {
 
 .answer-container.selected {
   background-color: hsl(var(--answer-default));
-  border: 0.6cqw solid hsl(210 100% 50%);
+  border: 0.4cqw solid hsl(210 100% 50%);
   box-shadow: 0 0 1.5cqw hsl(210 100% 50% / 0.5);
 }
 
 .answer-container.correct {
   background-color: #cefdd5;
-  border: 0.6cqw solid #2acb42;
+  border: 0.4cqw solid #2acb42;
   pointer-events: none;
 }
 
@@ -693,7 +699,7 @@ body.is-mobile .bamboo-section {
 
 .answer-container.wrong.selected {
   background-color: #ffcfcc;
-  border: 0.6cqw solid #ff3b30;
+  border: 0.4cqw solid #ff3b30;
   opacity: 1;
 }
 
@@ -726,6 +732,7 @@ body.is-mobile .answer-container {
   border-radius: 2.5cqw;
   padding: 1.5% 2%;
   gap: 2%;
+  border-width: 0.6cqw;
 }
 
 body.is-mobile .answer-label {

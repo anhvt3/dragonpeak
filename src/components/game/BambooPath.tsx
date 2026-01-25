@@ -51,9 +51,9 @@ const BambooPath = ({ mascotStep, isMoving, totalSteps }: BambooPathProps) => {
         <img src={assets.bambooPath} alt="Bamboo path" className="w-full h-auto object-contain" />
 
         <div
-          className="absolute transition-all duration-700 ease-out"
+          className="mascot-wrapper absolute transition-all duration-700 ease-out"
           style={{
-            bottom: '61%',
+            bottom: '57%',
             width: '22%',
             left: `${mascotPosition}%`,
             transform: "translateX(-50%) scaleY(1.2)",
