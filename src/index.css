@@ -1,9 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap");
-@import "katex/dist/katex.min.css";
 
 @layer base {
   :root {
@@ -279,7 +278,7 @@
     font-family: 'Medium SF Compact Rounded', 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 2.5cqw;
     font-weight: 600;
-    color: #4a2c00;
+    color: #000000;
     text-align: justify;
     text-align-last: left;
     padding: 0.5cqw 1.5cqw 1cqw 0.5cqw;
@@ -379,8 +378,33 @@
     filter: brightness(1.05);
   }
 
+  .answer-btn .katex {
+    white-space: nowrap;
+  }
+
+  .answer-btn .katex-display {
+    display: inline-block;
+    margin: 0;
+    white-space: nowrap;
+  }
+
   .answer-btn:active:not(:disabled) {
     transform: scale(0.98);
+  }
+
+  /* Critical Fixes for KaTeX in Tailwind */
+  .katex-html {
+    white-space: normal;
+  }
+
+  .answer-btn .katex .frac-line {
+    border-bottom-style: solid !important;
+    border-bottom-width: 1px !important;
+  }
+
+  .answer-btn .katex {
+    font-family: KaTeX_Main, 'Times New Roman', serif !important;
+    font-size: 1.1em;
   }
 
   .game-button {
@@ -532,7 +556,7 @@ body.is-mobile .question-text {
   height: 100%;
   max-height: 100%;
   padding: 1% 2%;
-  color: #4a2c00;
+  color: #000000;
 }
 
 body.is-mobile .answers-grid {
@@ -556,15 +580,7 @@ body.is-mobile .answer-btn {
   gap: 2%;
 }
 
-body.is-mobile .answer-btn span:first-child {
-  width: 5cqw;
-  height: 5cqw;
-  font-size: 2.5cqw;
-}
 
-body.is-mobile .answer-btn span:last-child {
-  font-size: 2.5cqw;
-}
 
 .bamboo-section {
   max-width: 100%;
@@ -589,6 +605,142 @@ body.is-mobile .bamboo-section {
   margin-top: -11cqw;
 }
 
+.answer-container {
+  position: relative;
+  cursor: pointer;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 3%;
+  padding: 2% 3%;
+  box-sizing: border-box;
+  border-radius: 2.5cqw;
+  background-color: hsl(var(--answer-default));
+  border: 0.6cqw solid hsl(var(--answer-default-border));
+  transition: all 0.2s ease;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.answer-label {
+  position: relative;
+  z-index: 2;
+  width: 7cqw;
+  height: 7cqw;
+  border-radius: 50%;
+  background-color: rgba(139, 69, 19, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4.5cqw;
+  font-weight: 700;
+  color: #000000;
+  font-family: Roboto, system-ui, -apple-system, sans-serif;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.answer-text {
+  display: block;
+  position: relative;
+  z-index: 2;
+  font-size: 4.5cqw;
+  font-weight: 600;
+  color: #000000;
+  text-align: justify;
+  padding: 0.5cqw 0;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.2;
+  text-align: justify;
+  text-align-last: left;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-all;
+}
+
+.answer-container:hover:not(.correct):not(.wrong) {
+  transform: scale(1.01);
+  filter: brightness(1.05);
+}
+
+.answer-container:active:not(.correct):not(.wrong) {
+  transform: scale(0.98);
+}
+
+.answer-container.selected {
+  background-color: hsl(var(--answer-default));
+  border: 0.6cqw solid hsl(210 100% 50%);
+  box-shadow: 0 0 1.5cqw hsl(210 100% 50% / 0.5);
+}
+
+.answer-container.correct {
+  background-color: #cefdd5;
+  border: 0.6cqw solid #2acb42;
+  pointer-events: none;
+}
+
+.answer-container.correct .answer-label {
+  background-color: #C8F7C5;
+  color: #2acb42;
+}
+
+.answer-container.wrong {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.answer-container.wrong.selected {
+  background-color: #ffcfcc;
+  border: 0.6cqw solid #ff3b30;
+  opacity: 1;
+}
+
+.answer-container.wrong.selected .answer-label {
+  background-color: #FADBD8;
+  color: #ff3b30;
+}
+
+/* Critical Fixes for KaTeX in Tailwind (Should be kept) */
+.katex-html {
+  white-space: normal;
+}
+
+.answer-container .katex .frac-line {
+  border-bottom-style: solid !important;
+  border-bottom-width: 1px !important;
+}
+
+.answer-container .katex {
+  font-family: KaTeX_Main, 'Times New Roman', serif !important;
+  font-size: 1.1em;
+}
+
 body.is-mobile .bamboo-wrapper {
   margin-top: -8cqw;
+}
+
+body.is-mobile .answer-container {
+  min-height: 8cqw;
+  border-radius: 2.5cqw;
+  padding: 1.5% 2%;
+  gap: 2%;
+}
+
+body.is-mobile .answer-label {
+  width: 5cqw;
+  height: 5cqw;
+  font-size: 3cqw;
+}
+
+body.is-mobile .answer-text {
+  font-size: 3cqw;
+}
+
+/* Force inherit font-size to override inline styles from API data */
+.question-text * {
+  font-size: inherit !important;
+  line-height: inherit !important;
+  box-sizing: border-box;
 }

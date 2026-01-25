@@ -21,73 +21,47 @@ const AnswerButton = ({
   correctIndex,
   onClick,
 }: AnswerButtonProps) => {
-  const getButtonClass = (): string => {
+  const getContainerClass = (): string => {
+    let classes = "answer-container";
+
     if (isAnswered) {
-      if (index === correctIndex) {
-        return "answer-btn-correct";
+      if (isSelected) {
+        if (isCorrect) {
+          classes += " correct";
+        } else {
+          classes += " wrong selected";
+        }
+      } 
+      else if (index === correctIndex) {
+        classes += " correct";
       }
-      if (isSelected && !isCorrect) {
-        return "answer-btn-wrong";
+      else {
+         classes += " wrong";
       }
-      return "answer-btn-default opacity-70";
+    } else {
+      if (isSelected) {
+        classes += " selected";
+      }
     }
 
-    if (isSelected) {
-      return "answer-btn-selected";
-    }
-    return "answer-btn-default";
+    return classes;
   };
 
   const labels = ["A", "B", "C", "D"];
 
-  const getLetterColor = (): string => {
-    if (isAnswered) {
-      if (index === correctIndex) {
-        return "#2acb42";
-      }
-      if (isSelected && !isCorrect) {
-        return "#ff3b30";
-      }
-    }
-    return "#4a2c00";
-  };
-
-  const getCircleBackground = (): string => {
-    if (isAnswered) {
-      if (index === correctIndex) {
-        return "#C8F7C5";
-      }
-      if (isSelected && !isCorrect) {
-        return "#FADBD8";
-      }
-    }
-    return "hsl(var(--primary) / 0.2)";
-  };
-
   return (
-    <button
-      onClick={onClick}
-      disabled={isDisabled}
-      className={`
-        answer-btn flex items-center transition-all duration-200
-        ${getButtonClass()}
-        ${isDisabled ? "cursor-not-allowed" : "cursor-pointer active:scale-95"}
-      `}
-      style={{ borderRadius: '2.5cqw', padding: '1.5% 2%', minHeight: '8cqw', gap: '2%' }}
+    <div
+      onClick={() => !isDisabled && onClick()}
+      className={getContainerClass()}
+      style={{ pointerEvents: isDisabled ? 'none' : 'auto' }}
     >
-      <span 
-        className="rounded-full flex items-center justify-center font-bold shrink-0 transition-colors duration-200"
-        style={{ width: '5cqw', height: '5cqw', fontSize: '2.5cqw', color: getLetterColor(), backgroundColor: getCircleBackground() }}
-      >
-        {labels[index]}
-      </span>
-      <span style={{ fontSize: '2.5cqw' }}>
-        <HtmlContent 
-          html={answer}
-          className="font-semibold text-left leading-tight min-w-0 break-all"
-        />
-      </span>
-    </button>
+      <div className="answer-label">
+        {labels[index] ?? index + 1}
+      </div>
+      <div className="answer-text">
+        <HtmlContent html={answer} />
+      </div>
+    </div>
   );
 };
 

@@ -177,7 +177,7 @@ const QuizGame = () => {
                 imageUrl={currentQuestion.imageUrl}
               />
 
-              <div className="flex flex-col w-full" style={{ gap: '1cqw', padding: '0 2cqw', marginTop: '2cqw' }} key={currentQuestionIndex}>
+              <div className="answers-grid mx-auto" key={currentQuestionIndex}>
                 {currentQuestion.answers.map((answer, index) => (
                   <AnswerButton
                     key={index}

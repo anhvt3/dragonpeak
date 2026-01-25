@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import renderMathInElement from "katex/dist/contrib/auto-render";
+import { createPortal } from "react-dom";
+
+declare global {
+  interface Window {
+    renderMathInElement?: (element: HTMLElement, options: object) => void;
+  }
+}
 
 interface HtmlContentProps {
   html: string;
@@ -14,15 +20,17 @@ const HtmlContent = ({ html, className = "", style }: HtmlContentProps) => {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    renderMathInElement(containerRef.current, {
-      delimiters: [
-        { left: "$$", right: "$$", display: true },
-        { left: "$", right: "$", display: false },
-        { left: "\\(", right: "\\)", display: false },
-        { left: "\\[", right: "\\]", display: true },
-      ],
-      throwOnError: false,
-    });
+    if (window.renderMathInElement) {
+      window.renderMathInElement(containerRef.current, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "$", right: "$", display: false },
+          { left: "\\(", right: "\\)", display: false },
+          { left: "\\[", right: "\\]", display: true },
+        ],
+        throwOnError: false,
+      });
+    }
   }, [html]);
 
   const handleClick = (e: React.MouseEvent) => {
@@ -51,6 +59,40 @@ const HtmlContent = ({ html, className = "", style }: HtmlContentProps) => {
     }
   };
 
+  const modal = modalImage ? createPortal(
+    <div
+      className="fixed inset-0 flex items-center justify-center"
+      style={{ zIndex: 9999, backgroundColor: 'rgba(0, 0, 0, 0.9)' }}
+      onClick={() => setModalImage(null)}
+    >
+      <button
+        className="absolute cursor-pointer text-white font-bold hover:text-[#ff6b6b] transition-colors duration-200"
+        style={{ 
+          zIndex: 10010, 
+          top: '3cqw', 
+          right: '5cqw', 
+          width: '5cqw', 
+          height: '5cqw', 
+          fontSize: '5cqw' 
+        }}
+        onClick={() => setModalImage(null)}
+      >
+        ×
+      </button>
+      <img
+        src={modalImage}
+        alt="Zoomed"
+        className="max-w-[90vw] max-h-[90vh] object-contain"
+        style={{ 
+          borderRadius: '1cqw', 
+          boxShadow: '0 0.5cqw 3cqw rgba(0, 0, 0, 0.5)' 
+        }}
+        onClick={(e) => e.stopPropagation()}
+      />
+    </div>,
+    document.body
+  ) : null;
+
   return (
     <>
       <div
@@ -60,28 +102,7 @@ const HtmlContent = ({ html, className = "", style }: HtmlContentProps) => {
         onClick={handleClick}
         dangerouslySetInnerHTML={{ __html: html }}
       />
-
-      {modalImage && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
-          onClick={() => setModalImage(null)}
-        >
-          <button
-            className="absolute font-bold hover:text-gray-300"
-            style={{ top: '3cqw', right: '4cqw', color: 'white', fontSize: '5cqw' }}
-            onClick={() => setModalImage(null)}
-          >
-            ×
-          </button>
-          <img
-            src={modalImage}
-            alt="Zoomed"
-            className="object-contain"
-            style={{ maxWidth: '90vw', maxHeight: '90vh' }}
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
+      {modal}
     </>
   );
 };
