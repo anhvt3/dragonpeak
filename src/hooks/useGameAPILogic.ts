@@ -88,6 +88,7 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
   const [sampleIsCompleted, setSampleIsCompleted] = useState(false);
   // Sample result simulation
   const [sampleCurrentResult, setSampleCurrentResult] = useState<{ isCorrect: boolean; correctAnswerId?: number } | null>(null);
+  const [manualIsCompleted, setManualIsCompleted] = useState(false);
 
   // --- Effective Data Selector ---
   // Select either API data or Sample data based on isSampleMode
@@ -190,7 +191,7 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
   // 2. Status Flags
   const isLoading = isSampleMode ? !rawCurrentQuestion : (!apiGame.quiz && !apiGame.isCompleted);
   const isAnswered = isSampleMode ? sampleIsAnswered : apiGame.hasSubmitted;
-  const isCompleted = isSampleMode ? sampleIsCompleted : apiGame.isCompleted;
+  const isCompleted = isSampleMode ? sampleIsCompleted : (apiGame.isCompleted || manualIsCompleted);
   const currentIdx = isSampleMode ? sampleIndex : apiGame.currentQuestionIndex;
 
   // Total questions is fixed to 5 for UI consistency
@@ -303,7 +304,7 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
       if (isSampleMode) {
         setSampleIsCompleted(true);
       } else {
-        apiGame.finish();
+        setManualIsCompleted(true);
       }
       return;
     }
@@ -332,6 +333,7 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
     setMascotStep(0);
     setIsMascotMoving(false);
     setReachedFinish(false);
+    setManualIsCompleted(false);
 
     if (isSampleMode) {
       setSampleIndex(0);
@@ -342,9 +344,9 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
       setSampleCurrentResult(null);
     } else {
       // Ideally finish/reset API. Reload is safest default to clear iframe state.
-      window.location.reload();
+      apiGame.finish();
     }
-  }, [isSampleMode]);
+  }, [isSampleMode, apiGame]);
 
 
   return {
