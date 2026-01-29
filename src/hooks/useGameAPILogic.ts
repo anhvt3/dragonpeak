@@ -52,17 +52,13 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
 
   // --- Strategy Determination ---
   const isSampleMode = useMemo(() => {
-    // Priority 1: Custom questions passed in (from URL loading in Index.tsx)
-    if (customQuestions && customQuestions.length > 0) return true;
-
-    // Priority 2: Query param ?sample=true
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get('sample') === 'true';
     }
 
     return false;
-  }, [customQuestions]);
+  }, []);
 
   // --- Real API Hook ---
   // Always call hooks at top level
@@ -89,24 +85,42 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
   // Sample result simulation
   const [sampleCurrentResult, setSampleCurrentResult] = useState<{ isCorrect: boolean; correctAnswerId?: number } | null>(null);
   const [manualIsCompleted, setManualIsCompleted] = useState(false);
+  const [hasApiInit, setHasApiInit] = useState(false);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const data = event?.data;
+      if (!data || data.type !== 'INIT') return;
+      setHasApiInit(true);
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
 
   // --- Effective Data Selector ---
   // Select either API data or Sample data based on isSampleMode
 
+  const hasCustomQuestions = !!(customQuestions && customQuestions.length > 0);
+  const shouldUseCustomQuestions = !isSampleMode && !hasApiInit && hasCustomQuestions && !apiGame.quiz;
+  const isLocalMode = isSampleMode || shouldUseCustomQuestions;
+
   const effectiveQuestionsRaw = useMemo(() => {
     if (isSampleMode) {
-      if (customQuestions && customQuestions.length > 0) return customQuestions;
       return fallbackQuestions;
     }
-    return apiGame.quiz ? [apiGame.quiz] : []; // In API mode, we only know the current question usually, or previous ones.
-  }, [isSampleMode, customQuestions, apiGame.quiz]);
+    if (shouldUseCustomQuestions) return customQuestions ?? [];
+    return apiGame.quiz ? [apiGame.quiz] : [];
+  }, [isSampleMode, shouldUseCustomQuestions, customQuestions, apiGame.quiz]);
 
   const rawCurrentQuestion = useMemo(() => {
-    if (isSampleMode) {
+    if (isLocalMode) {
       return effectiveQuestionsRaw[sampleIndex];
     }
     return apiGame.quiz;
-  }, [isSampleMode, effectiveQuestionsRaw, sampleIndex, apiGame.quiz]);
+  }, [isLocalMode, effectiveQuestionsRaw, sampleIndex, apiGame.quiz]);
 
   // --- Derived State for UI ---
 
@@ -135,8 +149,8 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
     // This is TRICKY. We need to match the 'correctAnswerId' from result/question to the index in answers array.
     let correctIdx = -1;
 
-    const relevantResult = isSampleMode ? sampleCurrentResult : apiGame.currentResult;
-    const selectedObj = isSampleMode ? sampleSelectedAnswer : apiGame.selectedAnswer;
+    const relevantResult = isLocalMode ? sampleCurrentResult : apiGame.currentResult;
+    const selectedObj = isLocalMode ? sampleSelectedAnswer : apiGame.selectedAnswer;
 
     // Logic: 
     // 1. If we have a result and it says "Correct", then the selected answer IS the correct answer.
@@ -185,26 +199,26 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
       correctIndex: correctIdx,
       _rawAnswers: normalizedAnswers // Keep raw for ID lookup
     };
-  }, [rawCurrentQuestion, isSampleMode, sampleCurrentResult, apiGame.currentResult, sampleSelectedAnswer, apiGame.selectedAnswer]);
+  }, [rawCurrentQuestion, isLocalMode, sampleCurrentResult, apiGame.currentResult, sampleSelectedAnswer, apiGame.selectedAnswer]);
 
 
   // 2. Status Flags
-  const isLoading = isSampleMode ? !rawCurrentQuestion : (!apiGame.quiz && !apiGame.isCompleted);
-  const isAnswered = isSampleMode ? sampleIsAnswered : apiGame.hasSubmitted;
-  const isCompleted = isSampleMode ? sampleIsCompleted : (apiGame.isCompleted || manualIsCompleted);
-  const currentIdx = isSampleMode ? sampleIndex : apiGame.currentQuestionIndex;
+  const isLoading = isLocalMode ? !rawCurrentQuestion : (!apiGame.quiz && !apiGame.isCompleted);
+  const isAnswered = isLocalMode ? sampleIsAnswered : apiGame.hasSubmitted;
+  const isCompleted = isLocalMode ? sampleIsCompleted : (apiGame.isCompleted || manualIsCompleted);
+  const currentIdx = isLocalMode ? sampleIndex : apiGame.currentQuestionIndex;
 
   // Total questions is fixed to 5 for UI consistency
   const totalQuestions = FIXED_TOTAL;
 
-  const correctCount = isSampleMode
+  const correctCount = isLocalMode
     ? sampleAnswers.filter(Boolean).length
     : apiGame.correctCount;
 
   // 3. Score State (Envelopes)
   const scoreState: EnvelopeState[] = useMemo(() => {
     // Current answers history
-    const history = isSampleMode ? sampleAnswers : apiGame.answers;
+    const history = isLocalMode ? sampleAnswers : apiGame.answers;
 
     const state: EnvelopeState[] = Array(FIXED_TOTAL).fill("pending");
     history.forEach((res, idx) => {
@@ -214,11 +228,11 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
       }
     });
     return state;
-  }, [isSampleMode, sampleAnswers, apiGame.answers]);
+  }, [isLocalMode, sampleAnswers, apiGame.answers]);
 
   // 4. Selected Answer Index (for UI)
   const selectedAnswerIdx = useMemo(() => {
-    const selected = isSampleMode ? sampleSelectedAnswer : apiGame.selectedAnswer;
+    const selected = isLocalMode ? sampleSelectedAnswer : apiGame.selectedAnswer;
     if (!selected) return null;
 
     // Find index in currentQuestion answers
@@ -226,7 +240,7 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
       return currentQuestion._rawAnswers.findIndex((a: any) => a.id === selected.id);
     }
     return null;
-  }, [isSampleMode, sampleSelectedAnswer, apiGame.selectedAnswer, currentQuestion]);
+  }, [isLocalMode, sampleSelectedAnswer, apiGame.selectedAnswer, currentQuestion]);
 
 
   // --- Actions ---
@@ -239,15 +253,15 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
     const answerObj = currentQuestion?._rawAnswers?.[index];
     if (!answerObj) return;
 
-    if (isSampleMode) {
+    if (isLocalMode) {
       setSampleSelectedAnswer(answerObj);
     } else {
       apiGame.handleAnswerSelect(answerObj);
     }
-  }, [isAnswered, isSampleMode, currentQuestion, apiGame, playButtonClick]);
+  }, [isAnswered, isLocalMode, currentQuestion, apiGame, playButtonClick]);
 
   const handleSubmit = useCallback(() => {
-    if (isSampleMode) {
+    if (isLocalMode) {
       if (!sampleSelectedAnswer || !rawCurrentQuestion) return;
 
       // --- Sample Logic Validation ---
@@ -291,17 +305,17 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
       // API Mode
       apiGame.updateAnswer();
     }
-  }, [isSampleMode, sampleSelectedAnswer, rawCurrentQuestion, sampleIndex, currentQuestion, apiGame, playCorrectAnswer, playWrongAnswer]);
+  }, [isLocalMode, sampleSelectedAnswer, rawCurrentQuestion, sampleIndex, currentQuestion, apiGame, playCorrectAnswer, playWrongAnswer]);
 
   const handleContinue = useCallback(() => {
     // Shared stopping logic
-    const nextIdx = isSampleMode ? sampleIndex + 1 : apiGame.currentQuestionIndex + 1;
+    const nextIdx = isLocalMode ? sampleIndex + 1 : apiGame.currentQuestionIndex + 1;
     const shouldStop = nextIdx >= FIXED_TOTAL || mascotStep >= MAX_POSITION;
 
     if (shouldStop) {
       playFinishGame();
       setReachedFinish(mascotStep >= MAX_POSITION);
-      if (isSampleMode) {
+      if (isLocalMode) {
         setSampleIsCompleted(true);
       } else {
         setManualIsCompleted(true);
@@ -309,7 +323,7 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
       return;
     }
 
-    if (isSampleMode) {
+    if (isLocalMode) {
       // Sample Mode Navigation
       // Check if we run out of sample data?
       if (effectiveQuestionsRaw.length <= nextIdx) {
@@ -326,7 +340,7 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
       // API Mode Navigation
       apiGame.handleContinue();
     }
-  }, [isSampleMode, sampleIndex, apiGame, mascotStep, playFinishGame, effectiveQuestionsRaw]);
+  }, [isLocalMode, sampleIndex, apiGame, mascotStep, playFinishGame, effectiveQuestionsRaw]);
 
   const handleRestart = useCallback(() => {
     // Basic UI reset
@@ -335,7 +349,7 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
     setReachedFinish(false);
     setManualIsCompleted(false);
 
-    if (isSampleMode) {
+    if (isLocalMode) {
       setSampleIndex(0);
       setSampleSelectedAnswer(null);
       setSampleIsAnswered(false);
@@ -346,11 +360,11 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
       // Ideally finish/reset API. Reload is safest default to clear iframe state.
       apiGame.finish();
     }
-  }, [isSampleMode, apiGame]);
+  }, [isLocalMode, apiGame]);
 
 
   return {
-    questions: isSampleMode ? effectiveQuestionsRaw : (apiGame.quiz ? [apiGame.quiz] : []), // Compat
+    questions: isLocalMode ? effectiveQuestionsRaw : (apiGame.quiz ? [apiGame.quiz] : []), // Compat
     isLoading,
     error: null,
     currentQuestionIndex: currentIdx,
