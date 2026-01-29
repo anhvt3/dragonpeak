@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { useGameAPI } from "usegamigameapi";
+import { useGameAPIEnhanced } from "@/hooks/useGameAPIEnhanced";
 import { gameConfig } from "@/config/gameConfig";
 import { useGameAudio } from "@/hooks/useGameAudio";
 import { EnvelopeState } from "@/components/game/LuckyEnvelopes";
@@ -62,7 +62,7 @@ export function useGameAPILogic(customQuestions?: any[] | null): GameState & Gam
 
   // --- Real API Hook ---
   // Always call hooks at top level
-  const apiGame = useGameAPI({
+  const apiGame = useGameAPIEnhanced({
     onAnswerCorrect: ({ currentQuestionIndex }) => {
       console.log(`Question ${currentQuestionIndex + 1} answered correctly!`);
       playCorrectAnswer();
